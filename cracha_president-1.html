@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crachá President 24H</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=Cormorant+Garamond:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #060810;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 50px;
+    padding: 40px 20px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  h2 {
+    color: #d4a017;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 6px;
+    font-size: 13px;
+    opacity: 0.5;
+  }
+
+  .page-wrapper {
+    display: flex;
+    gap: 60px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  /* ── CRACHÁ ── */
+  .cracha {
+    width: 200px;
+    background: linear-gradient(170deg, #0c0e12 0%, #1c1508 50%, #0c0e12 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(212,160,23,0.3);
+    box-shadow:
+      0 0 0 1px rgba(212,160,23,0.1),
+      0 30px 70px rgba(0,0,0,0.9),
+      0 0 60px rgba(212,160,23,0.06);
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.3s ease;
+  }
+  .cracha:hover { transform: translateY(-6px); }
+
+  /* Cordão / clip no topo */
+  .cracha-clip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 0 0;
+    gap: 0;
+    position: relative;
+    z-index: 5;
+  }
+  .clip-rect {
+    width: 44px;
+    height: 10px;
+    background: linear-gradient(90deg, #b8860b, #f0c040, #b8860b);
+    border-radius: 3px 3px 0 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  }
+  .clip-hole {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid rgba(212,160,23,0.6);
+    background: #060810;
+    margin-top: -2px;
+  }
+
+  /* Linha dourada topo */
+  .cracha-topline {
+    position: absolute;
+    top: 0; left: 30px; right: 30px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #d4a017, #f0c040, #d4a017, transparent);
+  }
+
+  /* Header dourado */
+  .cracha-header {
+    background: linear-gradient(135deg, #1a1200, #2a1e00, #1a1200);
+    border-top: 1px solid rgba(212,160,23,0.2);
+    border-bottom: 1px solid rgba(212,160,23,0.2);
+    padding: 12px 16px 10px;
+    text-align: center;
+    position: relative;
+  }
+  .cracha-marca {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 5px;
+    color: #d4a017;
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(212,160,23,0.4);
+  }
+  .cracha-sub {
+    font-size: 7px;
+    letter-spacing: 2.5px;
+    color: rgba(212,160,23,0.45);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* Foto */
+  .cracha-foto-area {
+    display: flex;
+    justify-content: center;
+    padding: 20px 0 14px;
+    position: relative;
+    z-index: 2;
+  }
+  .cracha-foto {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid rgba(212,160,23,0.5);
+    box-shadow: 0 0 20px rgba(212,160,23,0.15), 0 4px 16px rgba(0,0,0,0.6);
+    background: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+  .cracha-foto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+  }
+  .foto-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .foto-icon {
+    font-size: 30px;
+    opacity: 0.3;
+  }
+  .foto-txt {
+    font-size: 6px;
+    letter-spacing: 1px;
+    color: rgba(212,160,23,0.3);
+    text-transform: uppercase;
+  }
+
+  /* Info */
+  .cracha-info {
+    padding: 0 18px 18px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .cracha-nome {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: #e8d48a;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+  }
+  .cracha-cargo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: #d4a017;
+    background: rgba(212,160,23,0.08);
+    border: 1px solid rgba(212,160,23,0.2);
+    padding: 5px 10px;
+    border-radius: 2px;
+  }
+
+  /* Divisor */
+  .cracha-divider {
+    width: 40px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212,160,23,0.4), transparent);
+    margin: 0 auto;
+  }
+
+  /* Matrícula */
+  .cracha-matricula-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+  .cracha-matricula-label {
+    font-size: 7px;
+    letter-spacing: 2px;
+    color: rgba(212,160,23,0.35);
+    text-transform: uppercase;
+  }
+  .cracha-matricula {
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: rgba(212,160,23,0.7);
+  }
+
+  /* QR / barcode decorativo */
+  .cracha-footer {
+    background: rgba(212,160,23,0.04);
+    border-top: 1px solid rgba(212,160,23,0.12);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .cracha-footer-txt {
+    font-size: 6.5px;
+    color: rgba(212,160,23,0.25);
+    line-height: 1.6;
+  }
+  .barcode {
+    display: flex;
+    gap: 1px;
+    align-items: center;
+    height: 24px;
+  }
+  .barcode span {
+    display: block;
+    height: 100%;
+    background: rgba(212,160,23,0.3);
+    border-radius: 1px;
+  }
+
+  /* ── CONTROLES ── */
+  .controls {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: 100%;
+    max-width: 320px;
+  }
+  .controls-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: rgba(212,160,23,0.4);
+    text-transform: uppercase;
+    text-align: center;
+  }
+  .ctrl-group { display: flex; flex-direction: column; gap: 6px; }
+  .ctrl-lbl { font-size: 8px; letter-spacing: 2px; color: rgba(212,160,23,0.4); text-transform: uppercase; }
+  .ctrl-input, .ctrl-select {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(212,160,23,0.18);
+    color: #d4a017;
+    padding: 10px 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    outline: none;
+    border-radius: 2px;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .ctrl-input:focus, .ctrl-select:focus { border-color: rgba(212,160,23,0.5); }
+  .ctrl-input::placeholder { color: rgba(212,160,23,0.18); }
+  .ctrl-select option { background: #111; color: #d4a017; }
+
+  /* Upload foto */
+  .foto-upload-btn {
+    background: rgba(212,160,23,0.06);
+    border: 1px dashed rgba(212,160,23,0.3);
+    color: rgba(212,160,23,0.5);
+    padding: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border-radius: 2px;
+    text-align: center;
+    transition: all 0.2s;
+    width: 100%;
+  }
+  .foto-upload-btn:hover { background: rgba(212,160,23,0.1); border-color: rgba(212,160,23,0.5); color: #d4a017; }
+
+  .btns-row { display: flex; gap: 10px; }
+  .btn-action {
+    flex: 1;
+    border: none;
+    padding: 14px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: opacity 0.2s;
+  }
+  .btn-action:hover { opacity: 0.85; }
+  .btn-gold { background: #d4a017; color: #000; }
+  .btn-dark { background: #1a1408; color: #d4a017; border: 1px solid rgba(212,160,23,0.3); }
+
+  @media print {
+    body { background: white; padding: 0; gap: 0; }
+    .controls, h2 { display: none; }
+    .cracha {
+      box-shadow: none;
+      border: 1px solid #ccc;
+      break-inside: avoid;
+    }
+    .page-wrapper { justify-content: flex-start; gap: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<h2>PRESIDENT 24H — CRACHÁ DE FUNCIONÁRIO</h2>
+
+<div class="page-wrapper">
+
+  <!-- CRACHÁ FRENTE -->
+  <div class="cracha" id="crachaEl">
+    <div class="cracha-topline"></div>
+
+    <div class="cracha-clip">
+      <div class="clip-rect"></div>
+      <div class="clip-hole"></div>
+    </div>
+
+    <div class="cracha-header">
+      <div class="cracha-marca">PRESIDENT</div>
+      <div class="cracha-sub">24 Horas • Equipe</div>
+    </div>
+
+    <div class="cracha-foto-area">
+      <div class="cracha-foto" id="fotoCirculo">
+        <img id="fotoImg" src="" alt="foto">
+        <div class="foto-placeholder" id="fotoPlaceholder">
+          <div class="foto-icon">👤</div>
+          <div class="foto-txt">Foto</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cracha-info">
+      <div class="cracha-nome" id="displayNome">NOME DO FUNCIONÁRIO</div>
+      <div class="cracha-cargo" id="displayCargo">CARGO</div>
+      <div class="cracha-divider"></div>
+      <div class="cracha-matricula-area">
+        <div class="cracha-matricula-label">Matrícula</div>
+        <div class="cracha-matricula" id="displayMatricula">001</div>
+      </div>
+    </div>
+
+    <div class="cracha-footer">
+      <div class="cracha-footer-txt">
+        President 24H<br>
+        WA: (24) 99934-4903
+      </div>
+      <div class="barcode" id="barcode"></div>
+    </div>
+  </div>
+
+  <!-- CONTROLES -->
+  <div class="controls">
+    <div class="controls-label">✦ Personalizar Crachá ✦</div>
+
+    <div class="ctrl-group">
+      <div class="ctrl-lbl">Nome do Funcionário</div>
+      <input class="ctrl-input" id="inputNome" type="text" placeholder="Ex: João Silva" maxlength="26" oninput="atualizar()">
+    </div>
+
+    <div class="ctrl-group">
+      <div class="ctrl-lbl">Cargo</div>
+      <select class="ctrl-select" id="inputCargo" onchange="atualizar()">
+        <option value="OPERADOR">OPERADOR</option>
+        <option value="GERENTE">GERENTE</option>
+        <option value="SUPERVISOR">SUPERVISOR</option>
+        <option value="TÉCNICO">TÉCNICO</option>
+        <option value="SEGURANÇA">SEGURANÇA</option>
+        <option value="CAIXA">CAIXA</option>
+      </select>
+    </div>
+
+    <div class="ctrl-group">
+      <div class="ctrl-lbl">Matrícula</div>
+      <input class="ctrl-input" id="inputMatricula" type="text" placeholder="Ex: 001" maxlength="8" oninput="atualizar()">
+    </div>
+
+    <div class="ctrl-group">
+      <div class="ctrl-lbl">Foto do Funcionário</div>
+      <label class="foto-upload-btn">
+        📷 SELECIONAR FOTO
+        <input type="file" accept="image/*" style="display:none" onchange="carregarFoto(event)">
+      </label>
+    </div>
+
+    <div class="btns-row">
+      <button class="btn-action btn-gold" onclick="window.print()">🖨️ IMPRIMIR</button>
+      <button class="btn-action btn-dark" onclick="salvarPDF()">💾 PDF</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+  // Gera barcode decorativo
+  function gerarBarcode() {
+    const bc = document.getElementById('barcode');
+    bc.innerHTML = '';
+    const widths = [1,2,1,3,1,2,2,1,3,1,2,1,2,3,1,2,1,2,1,3];
+    widths.forEach(w => {
+      const s = document.createElement('span');
+      s.style.width = w + 'px';
+      bc.appendChild(s);
+    });
+  }
+  gerarBarcode();
+
+  function atualizar() {
+    const nome = document.getElementById('inputNome').value || 'NOME DO FUNCIONÁRIO';
+    const cargo = document.getElementById('inputCargo').value || 'CARGO';
+    const mat = document.getElementById('inputMatricula').value || '001';
+    document.getElementById('displayNome').textContent = nome.toUpperCase();
+    document.getElementById('displayCargo').textContent = cargo;
+    document.getElementById('displayMatricula').textContent = mat.padStart(3,'0');
+  }
+
+  function carregarFoto(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.getElementById('fotoImg');
+      img.src = e.target.result;
+      img.style.display = 'block';
+      document.getElementById('fotoPlaceholder').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function salvarPDF() {
+    const nome = document.getElementById('displayNome').textContent || 'funcionario';
+    const el = document.getElementById('crachaEl');
+    const opt = {
+      margin: 15,
+      filename: 'cracha_president_' + nome.toLowerCase().replace(/ /g,'_') + '.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 3, backgroundColor: '#060810' },
+      jsPDF: { unit: 'mm', format: [90, 140], orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(el).save();
+  }
+</script>
+
+</body>
+</html>

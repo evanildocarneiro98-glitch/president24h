@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cartão President 24H</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #060810;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 50px;
+    padding: 40px 20px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  h2 {
+    color: #d4a017;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 6px;
+    font-size: 13px;
+    opacity: 0.5;
+  }
+
+  .cards-wrapper {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .card {
+    width: 340px;
+    height: 214px;
+    border-radius: 14px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(212,160,23,0.25), 0 24px 60px rgba(0,0,0,0.85);
+    transition: transform 0.3s ease;
+  }
+  .card:hover { transform: translateY(-5px); }
+
+  .card-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #0c0e12 0%, #1c1508 50%, #0c0e12 100%);
+  }
+
+  .card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    border: 1px solid rgba(212,160,23,0.35);
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .card-topline {
+    position: absolute;
+    top: 0; left: 40px; right: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #d4a017, #f0c040, #d4a017, transparent);
+    z-index: 5;
+  }
+
+  .card-content {
+    position: absolute;
+    inset: 0;
+    padding: 20px 24px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 5;
+  }
+
+  .card-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 6px;
+    color: #d4a017;
+    line-height: 1;
+    text-shadow: 0 0 30px rgba(212,160,23,0.3);
+  }
+
+  .card-bottom { display: flex; flex-direction: column; gap: 3px; }
+  .card-name-label { font-size: 8px; letter-spacing: 2.5px; color: rgba(212,160,23,0.4); text-transform: uppercase; }
+  .card-name { font-family: 'Cormorant Garamond', serif; font-size: 16px; color: #e8d48a; letter-spacing: 1px; }
+  .card-uid-row { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+  .card-uid-label { font-size: 7px; letter-spacing: 2px; color: rgba(212,160,23,0.35); text-transform: uppercase; }
+  .card-uid-val { font-size: 10px; letter-spacing: 2px; color: rgba(212,160,23,0.6); }
+
+  /* VERSO */
+  .card-back .card-bg { background: linear-gradient(135deg, #0c0e12 0%, #160f02 60%, #0c0e12 100%); }
+  .card-stripe { position: absolute; top: 36px; left: 0; right: 0; height: 42px; background: linear-gradient(90deg, #111, #222, #111); border-top: 1px solid rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .card-sig-area { position: absolute; top: 98px; left: 24px; right: 24px; height: 32px; background: repeating-linear-gradient(-45deg, rgba(255,255,255,0.02), rgba(255,255,255,0.02) 2px, transparent 2px, transparent 6px); border: 1px solid rgba(212,160,23,0.12); display: flex; align-items: center; padding: 0 10px; }
+  .card-sig-text { font-family: 'Cormorant Garamond', serif; font-size: 13px; color: rgba(212,160,23,0.35); font-style: italic; }
+  .card-back-footer { position: absolute; bottom: 18px; left: 24px; right: 24px; display: flex; justify-content: space-between; align-items: flex-end; z-index: 5; }
+  .card-back-text { font-size: 7.5px; color: rgba(212,160,23,0.25); line-height: 1.7; }
+  .card-uid-back { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+  .card-uid-back-label { font-size: 7px; letter-spacing: 2px; color: rgba(212,160,23,0.3); }
+  .card-uid-back-val { font-size: 12px; letter-spacing: 2px; color: rgba(212,160,23,0.55); }
+
+  /* CONTROLES */
+  .controls { display: flex; flex-direction: column; align-items: center; gap: 18px; width: 100%; max-width: 500px; }
+  .controls-label { font-size: 9px; letter-spacing: 3px; color: rgba(212,160,23,0.4); text-transform: uppercase; }
+  .ctrl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; }
+  .ctrl-group { display: flex; flex-direction: column; gap: 6px; }
+  .ctrl-lbl { font-size: 8px; letter-spacing: 2px; color: rgba(212,160,23,0.4); text-transform: uppercase; }
+  .ctrl-input { background: rgba(255,255,255,0.03); border: 1px solid rgba(212,160,23,0.18); color: #d4a017; padding: 10px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; outline: none; border-radius: 2px; transition: border-color 0.2s; }
+  .ctrl-input:focus { border-color: rgba(212,160,23,0.5); }
+  .ctrl-input::placeholder { color: rgba(212,160,23,0.18); }
+  .btn-print { background: #d4a017; color: #000; border: none; padding: 14px 48px; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 3px; cursor: pointer; border-radius: 2px; transition: background 0.2s; }
+  .btn-print:hover { background: #f0c040; }
+
+  @media print {
+    body { background: white; padding: 0; }
+    .controls, h2 { display: none; }
+    .cards-wrapper { gap: 20px; }
+    .card { box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+
+<h2>PRESIDENT 24H — CARTÃO DO CLIENTE</h2>
+
+<div class="cards-wrapper">
+
+  <!-- FRENTE -->
+  <div class="card">
+    <div class="card-bg"></div>
+    <div class="card-topline"></div>
+    <div class="card-content">
+      <div class="card-logo">PRESIDENT</div>
+      <div class="card-bottom">
+        <div class="card-name-label">Titular</div>
+        <div class="card-name" id="displayNome">NOME DO CLIENTE</div>
+        <div class="card-uid-row">
+          <span class="card-uid-label">UID</span>
+          <span class="card-uid-val" id="displayUIDFrente">A1B2C3D4</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VERSO -->
+  <div class="card card-back">
+    <div class="card-bg"></div>
+    <div class="card-topline"></div>
+    <div class="card-stripe"></div>
+    <div class="card-sig-area">
+      <div class="card-sig-text" id="displayAssinatura">Assinatura do titular</div>
+    </div>
+    <div class="card-back-footer">
+      <div class="card-back-text">
+        Cartão pessoal e intransferível.<br>
+        Exclusivo para maiores de 18 anos.<br>
+        WA: (24) 99934-4903
+      </div>
+      <div class="card-uid-back">
+        <div class="card-uid-back-label">UID</div>
+        <div class="card-uid-back-val" id="displayUID">A1B2C3D4</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="controls">
+  <div class="controls-label">✦ Personalizar Cartão ✦</div>
+  <div class="ctrl-grid">
+    <div class="ctrl-group">
+      <div class="ctrl-lbl">Nome do Cliente</div>
+      <input class="ctrl-input" id="inputNome" type="text" placeholder="Ex: JOÃO SILVA" maxlength="24" oninput="atualizar()">
+    </div>
+    <div class="ctrl-group">
+      <div class="ctrl-lbl">UID do Chip RFID</div>
+      <input class="ctrl-input" id="inputUID" type="text" placeholder="Ex: A1B2C3D4" maxlength="12" oninput="atualizar()">
+    </div>
+    <div class="ctrl-group" style="grid-column:1/-1;">
+      <div class="ctrl-lbl">Assinatura (verso)</div>
+      <input class="ctrl-input" id="inputAssinatura" type="text" placeholder="Nome para assinatura" maxlength="24" oninput="atualizar()">
+    </div>
+  </div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+    <button class="btn-print" onclick="window.print()">🖨️ IMPRIMIR</button>
+    <button class="btn-print" style="background:#1a1408;color:#d4a017;border:1px solid rgba(212,160,23,0.4);" onclick="salvarPDF()">💾 SALVAR PDF</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+  function atualizar() {
+    const nome = document.getElementById('inputNome').value.toUpperCase() || 'NOME DO CLIENTE';
+    const uid  = document.getElementById('inputUID').value.toUpperCase() || 'A1B2C3D4';
+    const ass  = document.getElementById('inputAssinatura').value || 'Assinatura do titular';
+    document.getElementById('displayNome').textContent = nome;
+    document.getElementById('displayUIDFrente').textContent = uid;
+    document.getElementById('displayUID').textContent = uid;
+    document.getElementById('displayAssinatura').textContent = ass;
+  }
+
+  function salvarPDF() {
+    const nome = document.getElementById('displayNome').textContent || 'cartao';
+    const elemento = document.querySelector('.cards-wrapper');
+    const opt = {
+      margin: 10,
+      filename: 'cartao_president_' + nome.toLowerCase().replace(/ /g,'_') + '.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, backgroundColor: '#060810' },
+      jsPDF: { unit: 'mm', format: 'a5', orientation: 'landscape' }
+    };
+    html2pdf().set(opt).from(elemento).save();
+  }
+</script>
+</body>
+</html>
