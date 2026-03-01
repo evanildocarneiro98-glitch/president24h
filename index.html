@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>President 24H — Cadastro</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0c0f;--panel:#111418;--border:#1e2530;
+    --gold:#d4a017;--gold2:#f0c040;--red:#e84040;--green:#2dba6e;
+    --text:#c8d0dc;--muted:#5a6478;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;
+    min-height:100vh;display:flex;align-items:center;justify-content:center;
+    padding:20px;position:relative;overflow:hidden;
+  }
+  body::before{
+    content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;
+    background:radial-gradient(ellipse at 20% 20%,rgba(212,160,23,0.04) 0%,transparent 50%),
+               radial-gradient(ellipse at 80% 80%,rgba(61,156,240,0.03) 0%,transparent 50%);
+    pointer-events:none;
+  }
+  .container{width:100%;max-width:420px;position:relative;z-index:1;}
+  .logo-area{text-align:center;margin-bottom:32px;}
+  .logo{font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:6px;color:var(--gold);line-height:1;text-shadow:0 0 30px rgba(212,160,23,0.3);}
+  .logo-sub{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:4px;color:var(--muted);text-transform:uppercase;margin-top:4px;}
+  .logo-divider{width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:12px auto 0;}
+  .card{background:var(--panel);border:1px solid var(--border);padding:36px 32px;position:relative;}
+  .card::before{content:'';position:absolute;top:-1px;left:40px;right:40px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+  .card-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:var(--text);margin-bottom:4px;}
+  .card-desc{font-size:12px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:28px;line-height:1.6;}
+  .field{margin-bottom:18px;}
+  .field label{display:block;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:8px;}
+  .field input{
+    width:100%;background:rgba(255,255,255,0.03);border:1px solid var(--border);
+    color:var(--text);padding:13px 14px;font-family:'IBM Plex Mono',monospace;font-size:14px;
+    outline:none;transition:border-color .2s,background .2s;-webkit-appearance:none;border-radius:0;
+  }
+  .field input:focus{border-color:var(--gold);background:rgba(212,160,23,0.03);}
+  .field input.error{border-color:var(--red);}
+  .field-hint{font-size:10px;color:var(--red);font-family:'IBM Plex Mono',monospace;margin-top:5px;display:none;}
+  .btn-submit{
+    width:100%;background:var(--gold);color:#000;border:none;padding:16px;
+    font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;
+    cursor:pointer;transition:background .2s,transform .1s;margin-top:8px;
+  }
+  .btn-submit:hover{background:var(--gold2);}
+  .btn-submit:active{transform:scale(0.99);}
+  .btn-submit:disabled{background:var(--border);color:var(--muted);cursor:not-allowed;}
+  .spinner{display:none;width:18px;height:18px;border:2px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .state-screen{display:none;text-align:center;padding:10px 0;}
+  .state-icon{font-size:56px;margin-bottom:16px;display:block;animation:pop .4s cubic-bezier(0.175,0.885,0.32,1.275);}
+  @keyframes pop{0%{transform:scale(0.5);opacity:0;}100%{transform:scale(1);opacity:1;}}
+  .state-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;margin-bottom:8px;}
+  .state-desc{font-size:12px;color:var(--muted);font-family:'IBM Plex Mono',monospace;line-height:1.7;}
+  .state-cpf{
+    font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);letter-spacing:4px;
+    background:rgba(212,160,23,0.1);border:1px solid rgba(212,160,23,0.3);
+    padding:10px 20px;display:inline-block;margin:14px 0;
+  }
+  .lgpd{font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;text-align:center;margin-top:20px;line-height:1.6;border-top:1px solid var(--border);padding-top:16px;}
+  .footer{text-align:center;margin-top:20px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="logo-area">
+    <div class="logo">🍺 PRESIDENT</div>
+    <div class="logo-sub">24 Horas • Cadastro de Acesso</div>
+    <div class="logo-divider"></div>
+  </div>
+
+  <div class="card">
+
+    <!-- FORMULÁRIO -->
+    <div id="formArea">
+      <div class="card-title">VERIFICAÇÃO DE IDADE</div>
+      <div class="card-desc">Preencha seus dados para liberar o acesso à máquina. Apenas maiores de 18 anos.</div>
+
+      <div class="field">
+        <label>Nome completo</label>
+        <input type="text" id="inputNome" placeholder="Seu nome completo" autocomplete="name">
+        <div class="field-hint" id="erroNome"></div>
+      </div>
+
+      <div class="field">
+        <label>Data de nascimento</label>
+        <input type="tel" id="inputData" placeholder="DD/MM/AAAA" maxlength="10">
+        <div class="field-hint" id="erroData"></div>
+      </div>
+
+      <div class="field">
+        <label>CPF</label>
+        <input type="tel" id="inputCPF" placeholder="000.000.000-00" maxlength="14">
+        <div class="field-hint" id="erroCPF"></div>
+      </div>
+
+      <button class="btn-submit" id="btnEnviar">
+        <span id="btnTexto">VERIFICAR E CADASTRAR</span>
+        <div class="spinner" id="btnSpinner"></div>
+      </button>
+
+      <div class="lgpd">
+        🔒 Seus dados são armazenados com segurança e utilizados exclusivamente para verificação de maioridade, conforme a LGPD.
+      </div>
+    </div>
+
+    <!-- SUCESSO -->
+    <div class="state-screen" id="telaOk">
+      <span class="state-icon">✅</span>
+      <div class="state-title" style="color:var(--green);">CADASTRO APROVADO!</div>
+      <div class="state-desc">Você está cadastrado como maior de idade.<br>Na máquina, digite seu CPF para liberar:</div>
+      <div class="state-cpf" id="cpfExibido">—</div>
+      <div class="state-desc">Guarde esse número! Ele é sua chave de acesso.</div>
+    </div>
+
+    <!-- MENOR DE IDADE -->
+    <div class="state-screen" id="telaMenor">
+      <span class="state-icon">🚫</span>
+      <div class="state-title" style="color:var(--red);">ACESSO NEGADO</div>
+      <div class="state-desc">
+        Você precisa ter <strong style="color:var(--text);">18 anos ou mais</strong> para utilizar este equipamento.<br><br>
+        Venda de bebidas alcoólicas para menores de idade é crime (Lei 9.294/96).
+      </div>
+    </div>
+
+    <!-- JÁ CADASTRADO -->
+    <div class="state-screen" id="telaJaCadastrado">
+      <span class="state-icon">ℹ️</span>
+      <div class="state-title" style="color:var(--gold);">JÁ CADASTRADO</div>
+      <div class="state-desc">Este CPF já está registrado no sistema.<br>Use seu CPF direto na máquina:</div>
+      <div class="state-cpf" id="cpfJaCadastrado">—</div>
+    </div>
+
+    <!-- CADASTRO DESATIVADO -->
+    <div class="state-screen" id="telaDesativado">
+      <span class="state-icon">🔒</span>
+      <div class="state-title" style="color:var(--muted);">CADASTROS PAUSADOS</div>
+      <div class="state-desc">
+        O cadastro de novos clientes está temporariamente desativado.<br><br>
+        Entre em contato com o responsável para mais informações.
+      </div>
+    </div>
+
+    <!-- ERRO -->
+    <div class="state-screen" id="telaErro">
+      <span class="state-icon">⚠️</span>
+      <div class="state-title" style="color:var(--red);">ERRO DE CONEXÃO</div>
+      <div class="state-desc">Não foi possível concluir o cadastro.<br>Verifique sua internet e tente novamente.</div>
+      <button class="btn-submit" id="reiniciarBtn" style="margin-top:20px;">TENTAR NOVAMENTE</button>
+    </div>
+
+  </div>
+
+  <div class="footer">PRESIDENT 24H • ACESSO CONTROLADO</div>
+</div>
+
+<script type="module">
+  import { initializeApp }                      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyCPkuzIZ3RURx9NIZ8IAd96QNBVNmPIPK4",
+    authDomain:        "president24horas.firebaseapp.com",
+    projectId:         "president24horas",
+    storageBucket:     "president24horas.firebasestorage.app",
+    messagingSenderId: "918465727190",
+    appId:             "1:918465727190:web:8364fbcd6f08c185985777",
+    measurementId:     "G-9CMXDRF9N7"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+  console.log("Firebase conectado");
+
+  // Verifica se cadastro está habilitado pelo gerente
+  async function verificarModuloAtivo() {
+    try {
+      const snap = await getDoc(doc(db, 'config', 'cadastro'));
+      if (snap.exists() && snap.data().ativo === false) {
+        // Bloqueia o formulário
+        document.getElementById('formArea').style.display = 'none';
+        document.getElementById('telaDesativado').style.display = 'block';
+        return false;
+      }
+    } catch(e) { console.warn('Não verificou config:', e); }
+    return true;
+  }
+  verificarModuloAtivo();
+
+  // Máscaras
+  function mascararData(input) {
+    let v = input.value.replace(/\D/g, "");
+    if (v.length > 4) v = v.replace(/(\d{2})(\d{2})(\d{0,4})/, "$1/$2/$3");
+    else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,2})/, "$1/$2");
+    input.value = v;
+  }
+
+  function mascararCPF(input) {
+    let v = input.value.replace(/\D/g, "");
+    if (v.length > 9)      v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, "$1.$2.$3-$4");
+    else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{0,3})/, "$1.$2.$3");
+    else if (v.length > 3) v = v.replace(/(\d{3})(\d{0,3})/, "$1.$2");
+    input.value = v;
+  }
+
+  // Validações
+  function validarCPF(cpf) {
+    cpf = cpf.replace(/\D/g, "");
+    if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+    let soma = 0, resto;
+    for (let i = 1; i <= 9; i++) soma += parseInt(cpf[i - 1]) * (11 - i);
+    resto = (soma * 10) % 11;
+    if (resto === 10 || resto === 11) resto = 0;
+    if (resto !== parseInt(cpf[9])) return false;
+    soma = 0;
+    for (let i = 1; i <= 10; i++) soma += parseInt(cpf[i - 1]) * (12 - i);
+    resto = (soma * 10) % 11;
+    if (resto === 10 || resto === 11) resto = 0;
+    return resto === parseInt(cpf[10]);
+  }
+
+  function validarData(s) {
+    const p = s.split("/");
+    if (p.length !== 3) return false;
+    const [dia, mes, ano] = p.map(Number);
+    if (dia < 1 || dia > 31 || mes < 1 || mes > 12 || ano < 1900 || ano > new Date().getFullYear()) return false;
+    const d = new Date(ano, mes - 1, dia);
+    return d.getDate() === dia && d.getMonth() === mes - 1 && d.getFullYear() === ano;
+  }
+
+  function calcularIdade(s) {
+    const [dia, mes, ano] = s.split("/").map(Number);
+    const hoje = new Date();
+    let idade = hoje.getFullYear() - ano;
+    const m = hoje.getMonth() - (mes - 1);
+    if (m < 0 || (m === 0 && hoje.getDate() < dia)) idade--;
+    return idade;
+  }
+
+  // UI helpers
+  function mostrarErro(campo, msg) {
+    const ids = { nome: "erroNome", data: "erroData", cpf: "erroCPF" };
+    const el = document.getElementById(ids[campo]);
+    el.textContent = msg;
+    el.style.display = "block";
+    const inp = document.getElementById("input" + campo[0].toUpperCase() + campo.slice(1));
+    if (inp) { inp.classList.add("error"); inp.focus(); }
+  }
+
+  function limparErro(campo) {
+    const ids = { nome: "erroNome", data: "erroData", cpf: "erroCPF" };
+    const el = document.getElementById(ids[campo]);
+    if (el) el.style.display = "none";
+    const inp = document.getElementById("input" + campo[0].toUpperCase() + campo.slice(1));
+    if (inp) inp.classList.remove("error");
+  }
+
+  function setLoading(on) {
+    document.getElementById("btnTexto").style.display   = on ? "none"  : "block";
+    document.getElementById("btnSpinner").style.display = on ? "block" : "none";
+    document.getElementById("btnEnviar").disabled = on;
+  }
+
+  function mostrarTela(id) {
+    document.getElementById("formArea").style.display = "none";
+    document.getElementById(id).style.display = "block";
+  }
+
+  function reiniciar() {
+    ["telaErro","telaOk","telaMenor","telaJaCadastrado"].forEach(id => {
+      document.getElementById(id).style.display = "none";
+    });
+    document.getElementById("formArea").style.display = "block";
+    setLoading(false);
+  }
+
+  // Envio principal
+  async function enviarCadastro() {
+    const nome   = document.getElementById("inputNome").value.trim();
+    const data   = document.getElementById("inputData").value;
+    const cpfRaw = document.getElementById("inputCPF").value;
+    const cpf    = cpfRaw.replace(/\D/g, "");
+
+    let ok = true;
+    if (!nome || nome.length < 3)    { mostrarErro("nome", "Nome muito curto"); ok = false; }
+    if (!data || !validarData(data)) { mostrarErro("data", "Data inválida — use DD/MM/AAAA"); ok = false; }
+    if (!cpf  || !validarCPF(cpf))  { mostrarErro("cpf",  "CPF inválido"); ok = false; }
+    if (!ok) return;
+
+    const idade = calcularIdade(data);
+    if (idade < 18) { mostrarTela("telaMenor"); return; }
+
+    setLoading(true);
+
+    try {
+      // Revalida se cadastro ainda está ativo
+      const configSnap = await getDoc(doc(db, 'config', 'cadastro'));
+      if (configSnap.exists() && configSnap.data().ativo === false) {
+        mostrarTela("telaDesativado");
+        return;
+      }
+
+      const docRef = doc(db, "cadastros", cpf);
+      const snap   = await getDoc(docRef);
+
+      if (snap.exists()) {
+        document.getElementById("cpfJaCadastrado").textContent = cpfRaw;
+        mostrarTela("telaJaCadastrado");
+        return;
+      }
+
+      const [dd, mm, aaaa] = data.split("/");
+      await setDoc(docRef, {
+        nome:            nome,
+        cpf:             cpf,
+        cpf_formatado:   cpfRaw,
+        data_nascimento: aaaa + "-" + mm + "-" + dd,
+        idade:           idade,
+        maior_de_idade:  true,
+        cadastrado_em:   new Date().toISOString(),
+        status:          "ativo"
+      });
+
+      document.getElementById("cpfExibido").textContent = cpfRaw;
+      mostrarTela("telaOk");
+
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+      mostrarTela("telaErro");
+    }
+  }
+
+  // Eventos — todos registrados aqui dentro do module
+  document.getElementById("inputNome").addEventListener("input", () => limparErro("nome"));
+  document.getElementById("inputData").addEventListener("input", function() { mascararData(this); limparErro("data"); });
+  document.getElementById("inputCPF").addEventListener("input",  function() { mascararCPF(this);  limparErro("cpf");  });
+  document.getElementById("btnEnviar").addEventListener("click", enviarCadastro);
+  document.getElementById("reiniciarBtn").addEventListener("click", reiniciar);
+</script>
+</body>
+</html>
