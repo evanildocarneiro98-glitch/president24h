@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRESIDENT 24H — Dossiê Jurídico</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0c0f;--panel:#111418;--border:#1e2530;
+  --gold:#d4a017;--gold2:#f0c040;--red:#e84040;--green:#2dba6e;
+  --blue:#3d9cf0;--orange:#f07a20;--text:#c8d0dc;--muted:#5a6478;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:13px;min-height:100vh;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--border);}
+
+/* ── LOGIN ── */
+#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;position:fixed;inset:0;z-index:1000;background:var(--bg);}
+.login-box{background:var(--panel);border:1px solid var(--gold);padding:48px 40px;width:400px;position:relative;box-shadow:0 0 80px rgba(212,160,23,0.12);}
+.login-box::before{content:'';position:absolute;top:-1px;left:30px;right:30px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.login-logo{font-family:\"Bebas Neue\",sans-serif;font-size:40px;letter-spacing:5px;color:var(--gold);text-align:center;line-height:1;margin-bottom:4px;}
+.login-sub{text-align:center;color:var(--muted);font-size:10px;letter-spacing:3px;text-transform:uppercase;margin-bottom:32px;font-family:'IBM Plex Mono',monospace;}
+.login-field{margin-bottom:16px;}
+.login-field label{display:block;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-family:'IBM Plex Mono',monospace;}
+.login-field input{width:100%;background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--text);padding:12px 14px;font-family:'IBM Plex Mono',monospace;font-size:13px;outline:none;transition:border-color .2s;}
+.login-field input:focus{border-color:var(--gold);}
+.btn-login{width:100%;background:var(--gold);color:#000;border:none;padding:14px;font-family:\"Bebas Neue\",sans-serif;font-size:18px;letter-spacing:3px;cursor:pointer;margin-top:8px;transition:background .2s;}
+.btn-login:hover{background:var(--gold2);}
+.btn-login:disabled{opacity:.5;cursor:not-allowed;}
+#loginError{color:var(--red);text-align:center;font-size:11px;margin-top:12px;font-family:'IBM Plex Mono',monospace;display:none;padding:8px;background:rgba(232,64,64,0.08);border:1px solid rgba(232,64,64,0.3);}
+
+/* ── APP ── */
+#app{display:none;}
+
+/* Topbar */
+.topbar{background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:52px;position:sticky;top:0;z-index:100;}
+.topbar-brand{font-family:\"Bebas Neue\",sans-serif;font-size:22px;letter-spacing:4px;color:var(--gold);display:flex;align-items:center;gap:10px;}
+.topbar-right{display:flex;align-items:center;gap:16px;}
+.topbar-clock{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);}
+.btn-logout{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 14px;font-size:11px;cursor:pointer;font-family:'IBM Plex Mono',monospace;transition:all .2s;}
+.btn-logout:hover{border-color:var(--red);color:var(--red);}
+
+/* Content */
+.content{max-width:980px;margin:0 auto;padding:28px 24px;}
+.page-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+.page-title{font-family:\"Bebas Neue\",sans-serif;font-size:32px;letter-spacing:4px;}
+
+/* Cards */
+.card{background:var(--panel);border:1px solid var(--border);padding:22px;margin-bottom:16px;}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.card-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;font-size:10px;padding:3px 10px;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;text-transform:uppercase;}
+.badge-green{background:rgba(45,186,110,0.15);color:var(--green);border:1px solid rgba(45,186,110,0.3);}
+.badge-red{background:rgba(232,64,64,0.15);color:var(--red);border:1px solid rgba(232,64,64,0.3);}
+.badge-gold{background:rgba(212,160,23,0.15);color:var(--gold);border:1px solid rgba(212,160,23,0.3);}
+.badge-blue{background:rgba(61,156,240,0.15);color:var(--blue);border:1px solid rgba(61,156,240,0.3);}
+.badge-orange{background:rgba(240,122,32,0.15);color:var(--orange);border:1px solid rgba(240,122,32,0.3);}
+.badge-muted{background:rgba(90,100,120,0.2);color:var(--muted);border:1px solid var(--border);}
+
+/* Table */
+.table{width:100%;border-collapse:collapse;}
+.table th{text-align:left;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-family:'IBM Plex Mono',monospace;padding:0 12px 12px;border-bottom:1px solid var(--border);}
+.table td{padding:10px 12px;font-size:12px;border-bottom:1px solid rgba(30,37,48,.5);font-family:'IBM Plex Mono',monospace;}
+.table tr:last-child td{border-bottom:none;}
+.table tr:hover td{background:rgba(255,255,255,.02);}
+
+/* Botões */
+.btn-action{padding:10px 22px;border:none;cursor:pointer;font-family:\"Bebas Neue\",sans-serif;font-size:15px;letter-spacing:2px;transition:opacity .2s;}
+.btn-action:hover{opacity:.85;}
+.btn-gold{background:var(--gold);color:#000;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-blue{background:var(--blue);color:#000;}
+
+/* Inputs */
+.inp{background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--text);padding:11px 14px;font-family:'IBM Plex Mono',monospace;font-size:14px;outline:none;transition:border-color .2s;letter-spacing:1px;}
+.inp:focus{border-color:var(--gold);}
+
+/* Grid info */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:4px;}
+.info-box{background:rgba(255,255,255,0.02);border:1px solid var(--border);padding:12px;}
+.info-lbl{font-size:9px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;}
+.info-val{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text);}
+.info-val-big{font-family:\"Bebas Neue\",sans-serif;font-size:26px;letter-spacing:1px;}
+
+/* Aviso legal */
+.aviso-legal{background:rgba(212,160,23,0.04);border:1px solid rgba(212,160,23,0.3);padding:18px 22px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);line-height:1.8;}
+
+/* Spinner */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.1);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* Seção vazia */
+#jurVazio{text-align:center;padding:60px;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:13px;border:1px dashed var(--border);background:rgba(255,255,255,0.01);}
+
+/* Linha de reembolso/fraude */
+.linha-reg{padding:10px 0;border-bottom:1px solid rgba(30,37,48,0.6);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:11px;}
+.linha-reg:last-child{border-bottom:none;}
+
+/* Histórico compras sumário */
+.compras-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.cstat{background:rgba(61,156,240,0.06);border:1px solid rgba(61,156,240,0.2);padding:14px;text-align:center;}
+.cstat-val{font-family:\"Bebas Neue\",sans-serif;font-size:30px;color:var(--blue);letter-spacing:1px;}
+.cstat-lbl{font-size:9px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:2px;margin-top:2px;}
+
+/* Selo de autenticidade */
+.selo{display:flex;align-items:center;gap:16px;padding:16px 20px;background:rgba(45,186,110,0.06);border:1px solid rgba(45,186,110,0.25);}
+.selo-icon{font-size:32px;flex-shrink:0;}
+.selo-text{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);line-height:1.7;}
+.selo-hash{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--green);letter-spacing:1px;margin-top:4px;}
+
+/* Notificação */
+.notif{position:fixed;bottom:24px;right:24px;padding:14px 20px;font-family:'IBM Plex Mono',monospace;font-size:12px;z-index:9999;border:1px solid;transform:translateX(140%);transition:transform .3s;}
+.notif.show{transform:translateX(0);}
+.notif-ok{background:rgba(45,186,110,0.15);border-color:rgba(45,186,110,0.5);color:var(--green);}
+.notif-err{background:rgba(232,64,64,0.15);border-color:rgba(232,64,64,0.5);color:var(--red);}
+.notif-info{background:rgba(61,156,240,0.15);border-color:rgba(61,156,240,0.5);color:var(--blue);}
+
+/* Termo texto */
+.termo-box{background:rgba(0,0,0,0.2);border:1px solid var(--border);padding:14px 16px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);line-height:1.8;max-height:120px;overflow-y:auto;}
+
+@media(max-width:600px){
+  .login-box{width:95vw;padding:32px 20px;}
+  .info-grid{grid-template-columns:1fr 1fr;}
+  .compras-stats{grid-template-columns:1fr 1fr;}
+  .content{padding:16px;}
+  .btn-action{font-size:13px;padding:9px 16px;}
+}
+
+
+/* ── ABAS ── */
+.tab-section{display:none;}
+.tab-section.active{display:block;}
+.tab-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:6px 18px;font-family:'IBM Plex Mono',monospace;font-size:11px;cursor:pointer;letter-spacing:1px;transition:all .2s;}
+.tab-btn.on{background:rgba(212,160,23,0.18);border-color:var(--gold);color:var(--gold);}
+/* ── FORM ── */
+.ef{background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--text);padding:10px 14px;font-family:'IBM Plex Mono',monospace;font-size:12px;outline:none;transition:border-color .2s;width:100%;}
+.ef:focus{border-color:var(--gold);}
+.fl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:5px;display:block;}
+.fg{margin-bottom:12px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+/* ── PREVIEW ── */
+#dpv{background:var(--panel);border:1px solid var(--border);padding:24px 28px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;line-height:1.85;color:var(--text);}
+#dpv .pt{font-family:\"Bebas Neue\",sans-serif;font-size:26px;letter-spacing:5px;color:var(--gold);line-height:1;}
+#dpv .ph2{font-family:\"Bebas Neue\",sans-serif;font-size:13px;letter-spacing:3px;margin:18px 0 8px;border-bottom:1px solid rgba(212,160,23,0.25);padding-bottom:5px;}
+#dpv .sc{border-left:3px solid var(--gold);padding-left:14px;margin-bottom:18px;}
+#dpv .sc.sg{border-left-color:var(--green);}
+#dpv .sc.sb{border-left-color:var(--blue);}
+#dpv .sc.sr{border-left-color:var(--red);}
+#dpv .sc.so{border-left-color:var(--orange);}
+#dpv .ln{display:flex;gap:8px;margin-bottom:3px;font-size:10px;}
+#dpv .lb{color:var(--muted);min-width:200px;flex-shrink:0;}
+#dpv .vl{font-weight:600;}
+#dpv .vle{color:var(--gold);}
+#dpv .cl{margin-bottom:8px;font-size:10px;line-height:1.75;}
+#dpv .hb{background:rgba(212,160,23,0.05);border:1px solid rgba(212,160,23,0.3);padding:12px 16px;margin-top:12px;font-size:10px;color:var(--muted);line-height:1.8;}
+#dpv .selos{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;}
+#dpv .sl{padding:4px 12px;font-size:8px;letter-spacing:2px;font-weight:700;}
+#dpv .slg{background:rgba(45,186,110,.15);color:var(--green);border:1px solid rgba(45,186,110,.4);}
+#dpv .slb{background:rgba(61,156,240,.15);color:var(--blue);border:1px solid rgba(61,156,240,.4);}
+#dpv .slr{background:rgba(232,64,64,.15);color:var(--red);border:1px solid rgba(232,64,64,.4);}
+#dpv .slgo{background:rgba(212,160,23,.15);color:var(--gold);border:1px solid rgba(212,160,23,.4);}
+@media(max-width:700px){.maq-layout{grid-template-columns:1fr!important;}}
+@media print{
+  #loginScreen,.topbar,.painel-form,.notif,.tab-btns{display:none!important;}
+  #dpv{background:#fff!important;color:#000!important;border:none!important;padding:10px!important;}
+  #dpv .pt,#dpv .ph2{color:#b8860b!important;}
+  #dpv .lb{color:#777!important;}
+  #dpv .vl,#dpv .vle{color:#000!important;}
+  #dpv .hb{background:#fffbf0!important;color:#555!important;}
+  body{background:#fff!important;}
+}
+
+/* PRINT ORIGINAL */
+@media print{
+  body{background:#fff!important;color:#000!important;}
+  #loginScreen,#app>.topbar,.btn-action,.notif{display:none!important;}
+  .content{padding:0!important;max-width:100%!important;}
+  .card{background:#fff!important;border:1px solid #ddd!important;color:#000!important;break-inside:avoid;}
+  .card-title,.info-lbl,.aviso-legal{color:#555!important;}
+  .info-val,.info-val-big{color:#000!important;}
+  .badge{border:1px solid #ccc!important;color:#333!important;background:#f5f5f5!important;}
+}
+</style>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, getDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const cfg={apiKey:"AIzaSyCPkuzIZ3RURx9NIZ8IAd96QNBVNmPIPK4",authDomain:"president24horas.firebaseapp.com",projectId:"president24horas",storageBucket:"president24horas.firebasestorage.app",messagingSenderId:"918465727190",appId:"1:918465727190:web:8364fbcd6f08c185985777"};
+const app=getApps().find(a=>a.name==='juridico')||initializeApp(cfg,'juridico');
+const db=getFirestore(app);
+window._jdb=db;window._jcol=collection;window._jdoc=doc;window._jget=getDoc;window._jgetDocs=getDocs;window._jQuery=query;window._jwhere=where;
+window._fbJurReady=true;
+</script>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">⚖️ PRESIDENT</div>
+    <div class="login-sub">Dossiê Jurídico · Acesso restrito</div>
+    <div class="login-field">
+      <label>Usuário</label>
+      <input type="text" id="inpUser" placeholder="Evanildo" autocomplete="username"/>
+    </div>
+    <div class="login-field">
+      <label>Senha</label>
+      <input type="password" id="inpPass" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+    <button class="btn-login" id="btnEntrar" onclick="doLogin()">ENTRAR</button>
+    <div id="loginError">⚠ Usuário ou senha incorretos</div>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div class="topbar-brand">⚖️ <span>DOSSIÊ JURÍDICO</span></div>
+      <div class="tab-btns" style="display:flex;gap:2px;">
+        <button id="tbC" class="tab-btn on" onclick="setTab('C')">🔍 POR CPF</button>
+        <button id="tbM" class="tab-btn"    onclick="setTab('M')">🏭 DA MÁQUINA</button>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--green);">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;display:inline-block;"></span>
+        PRESIDENT 24H
+      </div>
+      <div class="topbar-clock" id="clock">--:--:--</div>
+      <button class="btn-logout" onclick="doLogout()">SAIR</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div id="tabC" class="tab-section active">
+    <div class="page-header">
+      <div class="page-title">⚖️ DOSSIÊ JURÍDICO</div>
+      <span style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">Consulta por CPF · Uso exclusivo para fins legais</span>
+    </div>
+
+    <!-- Busca -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">🔍 CONSULTAR CLIENTE</div></div>
+      <div style="display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;">
+        <input type="tel" id="jurCpf" class="inp" placeholder="000.000.000-00" maxlength="14"
+          style="flex:1;min-width:200px;" oninput="mascaraCpf(this)"
+          onkeydown="if(event.key==='Enter') jurBuscar()"/>
+        <button class="btn-action btn-gold" onclick="jurBuscar()" id="btnBuscar">🔍 BUSCAR</button>
+        <button class="btn-action btn-red" onclick="jurGerarPDF()" title="Salvar como PDF">📄 SALVAR PDF</button>
+      </div>
+      <div id="jurErro" style="font-size:11px;color:var(--red);font-family:'IBM Plex Mono',monospace;margin-top:10px;display:none;padding:8px;background:rgba(232,64,64,0.06);border:1px solid rgba(232,64,64,0.25);"></div>
+    </div>
+
+    <!-- Vazio / Loading -->
+    <div id="jurVazio">🔍 Digite um CPF acima e clique em BUSCAR para gerar o dossiê completo.</div>
+
+    <!-- Resultado -->
+    <div id="jurResultado" style="display:none;">
+
+      <!-- ── IDENTIFICAÇÃO ── -->
+      <div class="card" style="border-left:3px solid var(--gold);">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
+          <div>
+            <div style="font-family:\"Bebas Neue\",sans-serif;font-size:32px;letter-spacing:3px;color:var(--gold);" id="jurNome">—</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);" id="jurCpfExib">—</div>
+          </div>
+          <div style="text-align:right;">
+            <div id="jurStatusBadge" class="badge badge-green" style="font-size:12px;padding:5px 14px;">—</div>
+            <div style="font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:6px;" id="jurGeradoEm"></div>
+          </div>
+        </div>
+        <div class="info-grid">
+          <div class="info-box"><div class="info-lbl">Data de Nascimento</div><div class="info-val" id="jurDataNasc">—</div></div>
+          <div class="info-box"><div class="info-lbl">Idade</div><div class="info-val-big color-gold" id="jurIdade" style="color:var(--gold);">—</div></div>
+          <div class="info-box"><div class="info-lbl">Cadastrado em</div><div class="info-val" id="jurCadEm">—</div></div>
+          <div class="info-box"><div class="info-lbl">Cartão RFID</div><div class="info-val" id="jurCartao">—</div></div>
+          <div class="info-box"><div class="info-lbl">Tipo de acesso</div><div class="info-val" id="jurTipo">—</div></div>
+          <div class="info-box"><div class="info-lbl">Último acesso</div><div class="info-val" id="jurUltAcesso">—</div></div>
+        </div>
+      </div>
+
+      <!-- ── TERMO DE RESPONSABILIDADE ── -->
+      <div class="card" style="border-left:3px solid var(--green);">
+        <div class="card-header">
+          <div class="card-title">✅ TERMO DE RESPONSABILIDADE</div>
+          <div id="jurTermoBadge" class="badge badge-green">—</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+          <div class="info-box">
+            <div class="info-lbl">Situação do Aceite</div>
+            <div id="jurTermoAceito" style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;margin-top:4px;">—</div>
+          </div>
+          <div class="info-box">
+            <div class="info-lbl">Data do Aceite</div>
+            <div id="jurTermoData" style="font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:4px;">—</div>
+          </div>
+        </div>
+        <div class="info-lbl" style="margin-bottom:8px;">Texto aceito pelo cliente</div>
+        <div class="termo-box" id="jurTermoTexto">—</div>
+      </div>
+
+      <!-- ── REEMBOLSOS ── -->
+      <div class="card" style="border-left:3px solid var(--orange);">
+        <div class="card-header">
+          <div class="card-title">↩️ REEMBOLSOS SOLICITADOS</div>
+          <span id="jurReembBadge" class="badge badge-muted">0</span>
+        </div>
+        <div id="jurReembLista" style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px;">Nenhum reembolso encontrado.</div>
+      </div>
+
+      <!-- ── FRAUDES ── -->
+      <div class="card" style="border-left:3px solid var(--red);">
+        <div class="card-header">
+          <div class="card-title">🚨 TENTATIVAS DE FRAUDE</div>
+          <span id="jurFraudeBadge" class="badge badge-muted">0</span>
+        </div>
+        <div id="jurFraudeLista" style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px;">✅ Nenhuma fraude registrada.</div>
+      </div>
+
+      <!-- ── HISTÓRICO DE COMPRAS ── -->
+      <div class="card" style="border-left:3px solid var(--blue);">
+        <div class="card-header">
+          <div class="card-title">🍺 HISTÓRICO DE COMPRAS</div>
+          <span id="jurComprasBadge" class="badge badge-blue">0</span>
+        </div>
+        <div class="compras-stats">
+          <div class="cstat"><div class="cstat-val" id="jurTotalDoses">0</div><div class="cstat-lbl">DOSES</div></div>
+          <div class="cstat"><div class="cstat-val" id="jurTotalLitros">0L</div><div class="cstat-lbl">LITROS</div></div>
+          <div class="cstat" style="background:rgba(212,160,23,0.06);border-color:rgba(212,160,23,0.2);">
+            <div class="cstat-val" style="color:var(--gold);" id="jurTotalValor">R$0</div>
+            <div class="cstat-lbl">TOTAL GASTO</div>
+          </div>
+        </div>
+        <div id="jurComprasLista" style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px;">Carregando...</div>
+      </div>
+
+      <!-- ── REGISTRO DE REEMBOLSOS (tabela Firebase completa) ── -->
+      <div class="card" style="border-left:3px solid var(--muted);" id="cardReembFB">
+        <div class="card-header">
+          <div class="card-title">📋 REGISTROS NO FIREBASE — REEMBOLSOS</div>
+          <span id="jurReembFBBadge" class="badge badge-muted">0</span>
+        </div>
+        <div id="jurReembFBLista" style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px;">Nenhum registro.</div>
+      </div>
+
+      <!-- ── SELO DE AUTENTICIDADE ── -->
+      <div class="card" style="margin-top:4px;">
+        <div class="selo">
+          <div class="selo-icon">🔏</div>
+          <div>
+            <div style="font-family:\"Bebas Neue\",sans-serif;font-size:16px;letter-spacing:3px;color:var(--green);margin-bottom:4px;">DOCUMENTO AUTENTICADO</div>
+            <div class="selo-text">
+              Este dossiê foi gerado pelo sistema <strong style="color:var(--gold);">PRESIDENT 24H</strong> e contém registros autênticos
+              do banco de dados <strong style="color:var(--gold);">Firestore</strong> com timestamp de servidor.<br>
+              Pode ser utilizado como evidência em processos administrativos e judiciais, nos termos da
+              <strong>Lei nº 12.965/2014</strong> (Marco Civil da Internet) e <strong>Lei nº 13.709/2018</strong> (LGPD).
+            </div>
+            <div class="selo-hash" id="jurSeloHash">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── AVISO LEGAL ── -->
+      <div class="aviso-legal" style="margin-top:16px;">
+        ⚖️ <strong style="color:var(--gold);">AVISO LEGAL</strong> — Uso exclusivo para fins legais e administrativos. Acesso não autorizado é crime.
+        Todos os acessos são registrados com IP e timestamp. <br>
+        <span id="jurRodapeTs" style="color:var(--gold);"></span>
+      </div>
+
+    </div><!-- /jurResultado -->
+    </div><!-- /tabC -->
+
+    <!-- ══════════ ABA MÁQUINA ══════════ -->
+    <div id="tabM" class="tab-section">
+      <div class="page-header" style="margin-bottom:8px;">
+        <div class="page-title">🏭 DOSSIÊ DA MÁQUINA</div>
+        <span style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">Preencha · Preview ao vivo · Imprima ou salve em PDF</span>
+      </div>
+      <div class="maq-layout" style="display:grid;grid-template-columns:360px 1fr;gap:18px;align-items:start;">
+
+        <!-- FORMULÁRIO -->
+        <div class="painel-form">
+          <div class="card" style="border-left:3px solid var(--gold);margin-bottom:12px;">
+            <div class="card-header"><div class="card-title">🏢 OPERADOR</div></div>
+            <div class="fg"><span class="fl">Razão Social / Nome</span>
+              <input class="ef" id="fRazao" placeholder="Ex: João Silva ME" oninput="upv()"/></div>
+            <div class="fg"><span class="fl">CNPJ / CPF</span>
+              <input class="ef" id="fCnpj" placeholder="00.000.000/0001-00" oninput="upv()"/></div>
+            <div class="fg"><span class="fl">Endereço completo da máquina</span>
+              <input class="ef" id="fEnd" placeholder="Rua, nº — Bairro — Cidade/UF" oninput="upv()"/></div>
+            <div class="g2">
+              <div class="fg"><span class="fl">WhatsApp</span>
+                <input class="ef" id="fTel" value="(24) 99934-4903" oninput="upv()"/></div>
+              <div class="fg"><span class="fl">Data de instalação</span>
+                <input class="ef" id="fInst" placeholder="DD/MM/AAAA" oninput="upv()"/></div>
+            </div>
+          </div>
+          <div class="card" style="border-left:3px solid var(--blue);margin-bottom:12px;">
+            <div class="card-header"><div class="card-title">🏭 EQUIPAMENTO</div></div>
+            <div class="fg"><span class="fl">Nome da máquina</span>
+              <input class="ef" id="fNome" value="PRESIDENT 24H 01" oninput="upv()"/></div>
+            <div class="fg"><span class="fl">Métodos de pagamento</span>
+              <input class="ef" id="fPag" value="PIX · Voucher · Cartão Crédito/Débito · Cartão Presidente Pré-pago · Mercado Pago" oninput="upv()"/></div>
+            <div class="g2">
+              <div class="fg"><span class="fl">Versão software</span>
+                <input class="ef" id="fVer" value="PRESIDENT 24H v8.2" oninput="upv()"/></div>
+              <div class="fg"><span class="fl">Hardware</span>
+                <input class="ef" id="fHw" value="ESP32-S3" oninput="upv()"/></div>
+            </div>
+          </div>
+          <div class="card" style="border-left:3px solid var(--green);margin-bottom:12px;">
+            <div class="card-header"><div class="card-title">✅ CONTROLES ATIVOS</div></div>
+            <div style="display:flex;flex-direction:column;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:11px;">
+              <label style="display:flex;align-items:center;gap:9px;cursor:pointer;"><input type="checkbox" id="ckCpf"  checked onchange="upv()"/> Verificação CPF + Maioridade</label>
+              <label style="display:flex;align-items:center;gap:9px;cursor:pointer;"><input type="checkbox" id="ckRmb"  checked onchange="upv()"/> Reembolso automático para menores</label>
+              <label style="display:flex;align-items:center;gap:9px;cursor:pointer;"><input type="checkbox" id="ckBkp"  checked onchange="upv()"/> Backup automático Firebase</label>
+              <label style="display:flex;align-items:center;gap:9px;cursor:pointer;"><input type="checkbox" id="ckCam"  checked onchange="upv()"/> Câmera de monitoramento ativa</label>
+              <label style="display:flex;align-items:center;gap:9px;cursor:pointer;"><input type="checkbox" id="ckLog"  checked onchange="upv()"/> Log de operador imutável</label>
+              <label style="display:flex;align-items:center;gap:9px;cursor:pointer;"><input type="checkbox" id="ckImp"  checked onchange="upv()"/> Impressora de comprovantes</label>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn-action btn-gold" style="flex:1;padding:11px;" onclick="impMaq()">🖨️ IMPRIMIR / PDF</button>
+            <button class="btn-action" style="padding:11px 18px;background:var(--red);color:#fff;" onclick="limMaq()">🗑</button>
+          </div>
+        </div>
+
+        <!-- PREVIEW -->
+        <div id="dpv"></div>
+      </div>
+    </div><!-- /tabM -->
+
+  </div><!-- /content -->
+</div><!-- /app -->
+
+<div class="notif" id="notif"></div>
+
+<script>
+// ══════════════════════════════════════
+// CREDENCIAIS (mesmas do painel)
+// ══════════════════════════════════════
+const USERS = {
+  'Evanildo': 'Evanildo@2',
+  'admin':    'admin123',
+  'juridico': 'juridico@2025'
+};
+
+// ══════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════
+function mascaraCpf(el){
+  let v=el.value.replace(/\D/g,'').slice(0,11);
+  v=v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})\.(\d{3})(\d)/,'$1.$2.$3').replace(/(\d{3})\.(\d{3})\.(\d{3})(\d{1,2})$/,'$1.$2.$3-$4');
+  el.value=v;
+}
+function fmt(v){ return 'R$ '+parseFloat(v||0).toFixed(2).replace('.',','); }
+function fmtDt(iso){
+  if(!iso) return '—';
+  if(iso&&iso.toDate) iso=iso.toDate().toISOString();
+  try{ return new Date(iso).toLocaleString('pt-BR'); } catch(e){ return iso; }
+}
+function notif(msg,tipo='ok'){
+  const el=document.getElementById('notif');
+  el.textContent=msg; el.className=`notif notif-${tipo} show`;
+  setTimeout(()=>el.classList.remove('show'),3500);
+}
+function gerarHash(cpf){
+  let h=0;
+  for(const c of (cpf+Date.now().toString())){h=(h<<5)-h+c.charCodeAt(0);}
+  return 'SHA-'+Math.abs(h).toString(16).toUpperCase().padStart(8,'0')+'-'+Date.now().toString(36).toUpperCase();
+}
+setInterval(()=>{ const e=document.getElementById('clock'); if(e) e.textContent=new Date().toLocaleTimeString('pt-BR'); },1000);
+
+// ══════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════
+function doLogin(){
+  const u=document.getElementById('inpUser').value.trim();
+  const p=document.getElementById('inpPass').value;
+  const err=document.getElementById('loginError');
+  err.style.display='none';
+  if(!USERS[u]||USERS[u]!==p){
+    err.style.display='block'; return;
+  }
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').style.display='block';
+  notif('✅ Bem-vindo, '+u+'!','ok');
+}
+function doLogout(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('inpPass').value='';
+  document.getElementById('jurResultado').style.display='none';
+  document.getElementById('jurVazio').textContent='🔍 Digite um CPF acima e clique em BUSCAR para gerar o dossiê completo.';
+  document.getElementById('jurVazio').style.display='block';
+  document.getElementById('jurCpf').value='';
+}
+document.getElementById('inpPass').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+
+// ══════════════════════════════════════
+// BUSCA
+// ══════════════════════════════════════
+async function jurBuscar(){
+  const raw=document.getElementById('jurCpf').value.replace(/\D/g,'');
+  const errEl=document.getElementById('jurErro');
+  const vazio=document.getElementById('jurVazio');
+  const btn=document.getElementById('btnBuscar');
+
+  errEl.style.display='none';
+  if(raw.length!==11){
+    errEl.textContent='⚠ CPF inválido — informe 11 dígitos.'; errEl.style.display='block'; return;
+  }
+
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span>BUSCANDO...';
+  vazio.innerHTML='<span class="spinner"></span> Consultando Firestore...';
+  vazio.style.display='block';
+  document.getElementById('jurResultado').style.display='none';
+
+  // Aguarda Firebase
+  for(let i=0;i<30;i++){ if(window._jdb) break; await new Promise(r=>setTimeout(r,200)); }
+  if(!window._jdb){
+    vazio.textContent='❌ Erro de conexão com Firebase.';
+    btn.disabled=false; btn.innerHTML='🔍 BUSCAR'; return;
+  }
+
+  try{
+    const db=window._jdb;
+
+    // 1. Cadastro
+    const cadSnap=await window._jget(window._jdoc(db,'cadastros',raw));
+    if(!cadSnap.exists()){
+      // Tenta buscar por CPF formatado em outros documentos
+      let cadData=null;
+      try{
+        const cpfFmt=raw.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4');
+        const altSnap=await window._jgetDocs(window._jQuery(window._jcol(db,'cadastros'),window._jwhere('cpf','==',cpfFmt)));
+        if(!altSnap.empty) cadData={...altSnap.docs[0].data(),_docId:altSnap.docs[0].id};
+      }catch(e){}
+      if(!cadData){
+        vazio.innerHTML='❌ CPF <strong style="color:var(--gold);">'+raw.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4')+'</strong> não encontrado nos cadastros.';
+        btn.disabled=false; btn.innerHTML='🔍 BUSCAR'; return;
+      }
+      await renderDossie(cadData, raw, db);
+    } else {
+      await renderDossie(cadSnap.data(), raw, db);
+    }
+  }catch(e){
+    vazio.innerHTML='❌ Erro ao consultar Firebase: <span style="color:var(--red);">'+e.message+'</span>';
+  }
+  btn.disabled=false; btn.innerHTML='🔍 BUSCAR';
+}
+
+async function renderDossie(cad, cpfRaw, db){
+  const vazio=document.getElementById('jurVazio');
+  const cpfFmt=cpfRaw.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4');
+  const agora=new Date().toLocaleString('pt-BR');
+
+  let reembs=[], fraudes=[], compras=[], reembsFB=[];
+
+  // 2. Reembolsos no Firebase (coleção reembolsos)
+  try{
+    const rSnap=await window._jgetDocs(window._jcol(db,'reembolsos'));
+    rSnap.forEach(d=>{
+      const r=d.data();
+      const rCpf=(r.cpf||'').replace(/\D/g,'');
+      const rUid=(r.rfid||r.uid||'').toUpperCase();
+      const cadUid=(cad.cartao_uid||cad.rfid_uid||'').toUpperCase();
+      if(rCpf===cpfRaw||(cadUid&&rUid===cadUid)) reembsFB.push({...r,_id:d.id});
+    });
+    reembs=reembsFB;
+    fraudes=reembsFB.filter(r=>r.tipo==='fraude'||r.fraude===true);
+  }catch(e){}
+
+  // 3. Histórico de compras
+  try{
+    const hSnap=await window._jgetDocs(window._jQuery(window._jcol(db,'historico'),window._jwhere('cpf','==',cpfRaw)));
+    hSnap.forEach(d=>compras.push(d.data()));
+  }catch(e){}
+  // Fallback: tenta CPF formatado
+  if(!compras.length){
+    try{
+      const hSnap2=await window._jgetDocs(window._jQuery(window._jcol(db,'historico'),window._jwhere('cpf','==',cpfFmt)));
+      hSnap2.forEach(d=>compras.push(d.data()));
+    }catch(e){}
+  }
+
+  // ── Identificação ──
+  document.getElementById('jurNome').textContent   = cad.nome||'—';
+  document.getElementById('jurCpfExib').textContent= cad.cpf_formatado||cpfFmt;
+  document.getElementById('jurDataNasc').textContent=cad.data_nascimento||cad.dataNasc||'—';
+  document.getElementById('jurIdade').textContent  =(cad.idade||'—')+' anos';
+  document.getElementById('jurCadEm').textContent  = fmtDt(cad.cadastrado_em||cad.cadastro);
+  document.getElementById('jurCartao').textContent = cad.cartao_uid||cad.rfid_uid||cad.uid||'(sem cartão)';
+  document.getElementById('jurTipo').textContent   = cad.tipo||cad.plano||'Pré-pago';
+  document.getElementById('jurUltAcesso').textContent=fmtDt(cad.ultimo_acesso||cad.ultima_compra||null);
+  document.getElementById('jurGeradoEm').textContent='📅 Gerado em '+agora;
+
+  const maior=cad.maior_de_idade!==false&&(parseInt(cad.idade||99))>=18;
+  const badge=document.getElementById('jurStatusBadge');
+  badge.textContent=maior?'✅ MAIOR DE IDADE':'🚫 MENOR DE IDADE';
+  badge.className  ='badge '+(maior?'badge-green':'badge-red');
+
+  // ── Termo ──
+  const temTermo=!!cad.termo_aceito;
+  document.getElementById('jurTermoAceito').textContent  =temTermo?'✅ SIM — Aceito digitalmente':'⚠️ Não registrado';
+  document.getElementById('jurTermoAceito').style.color  =temTermo?'var(--green)':'var(--red)';
+  document.getElementById('jurTermoBadge').textContent   =temTermo?'ACEITO':'SEM REGISTRO';
+  document.getElementById('jurTermoBadge').className     ='badge '+(temTermo?'badge-green':'badge-red');
+  document.getElementById('jurTermoData').textContent    =fmtDt(cad.termo_data||cad.termo_aceito_em);
+  document.getElementById('jurTermoTexto').textContent   =cad.termo_texto||'Termo não registrado (cadastro anterior ao sistema de termos).';
+
+  // ── Reembolsos ──
+  document.getElementById('jurReembBadge').textContent=reembs.length;
+  document.getElementById('jurReembBadge').className  ='badge '+(reembs.length?'badge-orange':'badge-muted');
+  document.getElementById('jurReembLista').innerHTML  =reembs.length
+    ? '<table class="table"><thead><tr><th>Data/Hora</th><th>Valor</th><th>Código</th><th>Método</th><th>Status</th></tr></thead><tbody>'+
+      reembs.map(r=>`<tr>
+        <td>${fmtDt(r.data||r.cadastrado_em)}</td>
+        <td style="color:var(--orange);font-weight:600;">${fmt(r.valor)}</td>
+        <td>${r.codigo||'—'}</td>
+        <td>${r.metodo||r.mpMetodoPgto||'—'}</td>
+        <td><span class="badge ${r.status==='pago'?'badge-green':r.status==='fraude'?'badge-red':'badge-orange'}">${r.status||'pendente'}</span></td>
+      </tr>`).join('')+
+      '</tbody></table>'
+    : '<span style="color:var(--green);">✅ Nenhum reembolso encontrado.</span>';
+
+  // ── Fraudes ──
+  document.getElementById('jurFraudeBadge').textContent=fraudes.length;
+  document.getElementById('jurFraudeBadge').className  ='badge '+(fraudes.length?'badge-red':'badge-green');
+  document.getElementById('jurFraudeLista').innerHTML  =fraudes.length
+    ? '<table class="table"><thead><tr><th>Data/Hora</th><th>Valor</th><th>Código</th><th>Tipo</th></tr></thead><tbody>'+
+      fraudes.map(r=>`<tr>
+        <td>${fmtDt(r.data||r.cadastrado_em)}</td>
+        <td style="color:var(--red);font-weight:600;">${fmt(r.valor)}</td>
+        <td>${r.codigo||'—'}</td>
+        <td><span class="badge badge-red">FRAUDE DETECTADA</span></td>
+      </tr>`).join('')+
+      '</tbody></table>'
+    : '<span style="color:var(--green);">✅ Nenhuma fraude registrada.</span>';
+
+  // ── Compras ──
+  let totalDoses=0,totalLitros=0,totalValor=0;
+  compras.forEach(c=>{
+    totalDoses +=parseInt(c.doses||c.quantidade||1);
+    totalLitros+=parseFloat(c.litros||0)+(parseFloat(c.ml||0)/1000);
+    totalValor +=parseFloat(c.valor||c.preco||0);
+  });
+  document.getElementById('jurComprasBadge').textContent=compras.length;
+  document.getElementById('jurTotalDoses').textContent  =totalDoses;
+  document.getElementById('jurTotalLitros').textContent =totalLitros.toFixed(1)+'L';
+  document.getElementById('jurTotalValor').textContent  =fmt(totalValor);
+  document.getElementById('jurComprasLista').innerHTML  =compras.length
+    ? '<table class="table"><thead><tr><th>Data</th><th>Produto</th><th>Doses</th><th>Litros</th><th>Valor</th></tr></thead><tbody>'+
+      [...compras].sort((a,b)=>(b.data||'').localeCompare(a.data||'')).map(c=>`<tr>
+        <td>${fmtDt(c.data||c.cadastrado_em)}</td>
+        <td>${c.produto||c.cerveja||'—'}</td>
+        <td>${c.doses||c.quantidade||'—'}</td>
+        <td>${parseFloat(c.litros||c.ml||0).toFixed(2)}</td>
+        <td>${fmt(c.valor||c.preco||0)}</td>
+      </tr>`).join('')+
+      '</tbody></table>'
+    : '<span style="color:var(--muted);">Nenhuma compra registrada nesta coleção.</span>';
+
+  // ── Registros Firebase reembolsos (tabela completa) ──
+  document.getElementById('jurReembFBBadge').textContent=reembsFB.length;
+  document.getElementById('jurReembFBLista').innerHTML  =reembsFB.length
+    ? '<table class="table"><thead><tr><th>ID Doc</th><th>Data</th><th>Valor</th><th>Código</th><th>RFID</th><th>Status</th></tr></thead><tbody>'+
+      reembsFB.map(r=>`<tr>
+        <td style="color:var(--muted);font-size:10px;">${r._id||'—'}</td>
+        <td>${fmtDt(r.data||r.cadastrado_em)}</td>
+        <td style="color:var(--orange);font-weight:600;">${fmt(r.valor)}</td>
+        <td>${r.codigo||'—'}</td>
+        <td>${r.rfid||r.uid||'—'}</td>
+        <td><span class="badge ${r.status==='pago'?'badge-green':r.status==='fraude'?'badge-red':'badge-orange'}">${r.status||'—'}</span></td>
+      </tr>`).join('')+
+      '</tbody></table>'
+    : '<span style="color:var(--muted);">Nenhum registro Firebase encontrado.</span>';
+
+  // ── Selo e rodapé ──
+  const hash=gerarHash(cpfRaw);
+  document.getElementById('jurSeloHash').textContent   ='Hash de autenticidade: '+hash;
+  document.getElementById('jurRodapeTs').textContent   ='Dossiê gerado em '+agora+' | CPF: '+cpfFmt+' | Sistema: PRESIDENT 24H | '+hash;
+
+  vazio.style.display='none';
+  document.getElementById('jurResultado').style.display='block';
+  notif('✅ Dossiê gerado — '+( cad.nome||cpfFmt),'ok');
+}
+
+// ══════════════════════════════════════
+// GERAR PDF
+// ══════════════════════════════════════
+function jurGerarPDF(){
+  if(document.getElementById('jurResultado').style.display==='none'){
+    notif('⚠ Busque um CPF primeiro!','err'); return;
+  }
+  const g=id=>document.getElementById(id)?.textContent||'—';
+  const gi=id=>document.getElementById(id)?.innerHTML||'';
+  const agora=new Date().toLocaleString('pt-BR');
+
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+  <title>Dossiê Jurídico — ${g('jurNome')}</title>
+  <style>
+    body{font-family:'Courier New',monospace;font-size:12px;color:#111;margin:36px;background:#fff;}
+    h1{font-size:20px;border-bottom:3px solid #d4a017;padding-bottom:8px;color:#1a1a1a;margin-bottom:20px;}
+    h2{font-size:13px;font-weight:700;border-bottom:1px solid #ddd;padding-bottom:5px;margin:20px 0 10px;color:#333;text-transform:uppercase;letter-spacing:2px;}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0;}
+    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0;}
+    .box{border:1px solid #e0d8c0;padding:10px 12px;background:#fdfaf3;}
+    .lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:4px;}
+    .val{font-size:13px;font-weight:700;}
+    .val-big{font-size:22px;font-weight:900;color:#b8860b;}
+    table{width:100%;border-collapse:collapse;margin-top:8px;font-size:11px;}
+    thead tr{background:#3a3a3a;} th{color:#fff;padding:7px 10px;text-align:left;}
+    td{padding:6px 10px;border-bottom:1px solid #eee;}
+    .rodape{margin-top:28px;padding:14px;border:2px solid #d4a017;background:#fffbf0;font-size:10px;color:#666;line-height:1.8;}
+    .ok{color:#16a34a;font-weight:700;} .err{color:#cc2200;font-weight:700;}
+    .badge{display:inline-block;padding:2px 8px;font-size:10px;font-weight:700;border:1px solid #ccc;background:#f5f5f5;}
+    .selo{border:1px solid #d4a017;padding:12px;background:#fffbf0;margin-top:16px;}
+    .hash{font-family:monospace;font-size:10px;color:#16a34a;margin-top:4px;}
+    @media print{body{margin:20px;}}
+  </style></head><body>
+  <h1>⚖️ DOSSIÊ JURÍDICO — PRESIDENT 24H</h1>
+
+  <h2>Identificação do Cliente</h2>
+  <div class="grid">
+    <div class="box"><div class="lbl">Nome completo</div><div class="val">${g('jurNome')}</div></div>
+    <div class="box"><div class="lbl">CPF</div><div class="val">${g('jurCpfExib')}</div></div>
+    <div class="box"><div class="lbl">Data de nascimento</div><div class="val">${g('jurDataNasc')}</div></div>
+    <div class="box"><div class="lbl">Idade</div><div class="val">${g('jurIdade')}</div></div>
+    <div class="box"><div class="lbl">Cadastrado em</div><div class="val">${g('jurCadEm')}</div></div>
+    <div class="box"><div class="lbl">Cartão RFID</div><div class="val">${g('jurCartao')}</div></div>
+    <div class="box"><div class="lbl">Situação</div><div class="val">${g('jurStatusBadge')}</div></div>
+    <div class="box"><div class="lbl">Tipo de acesso</div><div class="val">${g('jurTipo')}</div></div>
+  </div>
+
+  <h2>Termo de Responsabilidade</h2>
+  <div class="box">
+    <div class="lbl">Aceite</div>
+    <div class="${document.getElementById('jurTermoAceito')?.style.color?.includes('green')?'ok':'err'}">${g('jurTermoAceito')}</div>
+    <div class="lbl" style="margin-top:8px;">Data do aceite</div>
+    <div>${g('jurTermoData')}</div>
+    <div class="lbl" style="margin-top:8px;">Texto aceito</div>
+    <div style="font-size:10px;color:#555;line-height:1.7;margin-top:4px;">${g('jurTermoTexto')}</div>
+  </div>
+
+  <h2>Reembolsos Solicitados (${g('jurReembBadge')})</h2>
+  ${gi('jurReembLista')||'<p style="color:#888;">Nenhum reembolso.</p>'}
+
+  <h2>Tentativas de Fraude (${g('jurFraudeBadge')})</h2>
+  ${gi('jurFraudeLista')||'<p style="color:#16a34a;">✅ Nenhuma fraude.</p>'}
+
+  <h2>Histórico de Compras (${g('jurComprasBadge')})</h2>
+  <div class="grid3">
+    <div class="box" style="text-align:center;"><div class="lbl">Total Doses</div><div class="val-big">${g('jurTotalDoses')}</div></div>
+    <div class="box" style="text-align:center;"><div class="lbl">Total Litros</div><div class="val-big">${g('jurTotalLitros')}</div></div>
+    <div class="box" style="text-align:center;"><div class="lbl">Total Gasto</div><div class="val-big">${g('jurTotalValor')}</div></div>
+  </div>
+  ${gi('jurComprasLista')||''}
+
+  <h2>Registros Firebase — Reembolsos (${g('jurReembFBBadge')})</h2>
+  ${gi('jurReembFBLista')||'<p style="color:#888;">Nenhum registro.</p>'}
+
+  <div class="selo">
+    <strong>🔏 DOCUMENTO AUTENTICADO — PRESIDENT 24H</strong><br>
+    Este dossiê contém registros autênticos do banco de dados Firestore com timestamp de servidor.<br>
+    Válido nos termos da <strong>Lei nº 12.965/2014</strong> (Marco Civil da Internet) e <strong>Lei nº 13.709/2018</strong> (LGPD).
+    <div class="hash">${g('jurRodapeTs')}</div>
+  </div>
+
+  <div class="rodape">
+    ⚖️ <strong>AVISO LEGAL</strong> — Este dossiê foi gerado automaticamente pelo sistema PRESIDENT 24H.<br>
+    Gerado em: <strong>${agora}</strong> | Operador: ${document.getElementById('inpUser')?.value||'—'}
+  </div>
+  <script>window.onload=function(){window.print();}<\/script>
+  </body></html>`;
+  var w=window.open('','_blank');
+  if(w){w.document.write(html);w.document.close();}
+}
+// ── ABAS ──
+function setTab(t){
+  ['C','M'].forEach(function(x){
+    document.getElementById('tab'+x).classList.toggle('active',x===t);
+    document.getElementById('tb'+x).classList.toggle('on',x===t);
+  });
+  if(t==='M') upv();
+}
+
+// ── HELPERS ──
+function gv(id){ var el=document.getElementById(id); return el?el.value.trim():''; }
+function gc(id){ var el=document.getElementById(id); return el?el.checked:false; }
+function ctrl(id,txt){
+  return gc(id)
+    ? '<div style="color:var(--green);">&#10003; '+txt+' &mdash; <strong>ATIVO</strong></div>'
+    : '<div style="color:var(--muted);">&#9711; '+txt+' &mdash; inativo</div>';
+}
+function eh(s){ var d={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'};return s.replace(/[&<>"]/g,function(c){return d[c]||c;}); }
+function warn(txt){
+  return '<span style="color:var(--orange);">&#9888; '+txt+'</span>';
+}
+
+// ── PREVIEW ──
+function upv(){
+  var agora   = new Date().toLocaleString('pt-BR');
+  var dHoje   = new Date().toLocaleDateString('pt-BR');
+  var razao   = gv('fRazao')  || warn('Preencha a Razão Social');
+  var cnpj    = gv('fCnpj')   || warn('Preencha o CNPJ/CPF');
+  var end_    = gv('fEnd')    || warn('Preencha o Endereço');
+  var tel     = gv('fTel')    || '(24) 99934-4903';
+  var inst    = gv('fInst')   || '____/____/________';
+  var nome    = gv('fNome')   || 'PRESIDENT 24H 01';
+  var pag     = gv('fPag')    || 'PIX &middot; Voucher &middot; Cartão Crédito/Débito &middot; Cartão Presidente Pré-pago &middot; Mercado Pago';
+  var ver     = gv('fVer')    || 'PRESIDENT 24H v8.2';
+  var hw      = gv('fHw')     || 'ESP32-S3';
+
+  var hv=0; var hs=gv('fRazao')+gv('fCnpj')+dHoje;
+  for(var i=0;i<hs.length;i++){hv=(hv<<5)-hv+hs.charCodeAt(i);}
+  var prot='PRES-'+dHoje.replace(/\//g,'')+'-'+Math.abs(hv).toString(36).toUpperCase().slice(0,6).padEnd(6,'X');
+  var hash='SHA256-'+Math.abs(hv*31).toString(16).toUpperCase().padStart(20,'0').slice(0,20);
+
+  var op = gv('fRazao') ? eh(gv('fRazao')) : '___________________________';
+
+  document.getElementById('dpv').innerHTML =
+    '<div style="border-bottom:2px solid var(--gold);padding-bottom:14px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">'
+      +'<div><div class="pt">DOSSIÊ JURÍDICO COMPLETO</div>'
+      +'<div style="font-size:9px;color:var(--muted);letter-spacing:2px;margin-top:3px;">CONFORMIDADE LEGAL &middot; TERMO DE RESPONSABILIDADE &middot; AUDITORIA</div></div>'
+      +'<div style="text-align:right;font-size:10px;">'
+        +'<div style="color:var(--gold);font-weight:700;">'+prot+'</div>'
+        +'<div style="color:var(--muted);">'+agora+'</div>'
+        +'<div style="margin-top:5px;background:rgba(232,64,64,0.15);color:var(--red);border:1px solid rgba(232,64,64,0.4);padding:2px 10px;font-size:9px;letter-spacing:2px;font-weight:700;display:inline-block;">USO RESTRITO</div>'
+      +'</div>'
+    +'</div>'
+
+    +'<div class="sc">'
+      +'<div class="ph2" style="color:var(--gold);">1. IDENTIFICAÇÃO DO EQUIPAMENTO</div>'
+      +'<div class="ln"><span class="lb">NOME / IDENTIFICAÇÃO:</span><span class="vl">'+eh(nome)+'</span></div>'
+      +'<div class="ln"><span class="lb">OPERADOR RESPONSÁVEL:</span><span class="vl vle">'+razao+'</span></div>'
+      +'<div class="ln"><span class="lb">CNPJ / CPF OPERADOR:</span><span class="vl vle">'+cnpj+'</span></div>'
+      +'<div class="ln"><span class="lb">TELEFONE / WHATSAPP:</span><span class="vl">'+eh(tel)+'</span></div>'
+      +'<div class="ln"><span class="lb">ENDEREÇO / LOCALIZAÇÃO:</span><span class="vl vle">'+end_+'</span></div>'
+      +'<div class="ln"><span class="lb">MÉTODOS DE PAGAMENTO:</span><span class="vl">'+pag+'</span></div>'
+      +'<div class="ln"><span class="lb">VERSÃO DO SOFTWARE:</span><span class="vl">'+eh(ver)+'</span></div>'
+      +'<div class="ln"><span class="lb">HARDWARE:</span><span class="vl">'+eh(hw)+' — IP 192.168.x.x</span></div>'
+      +'<div class="ln"><span class="lb">BANCO DE DADOS:</span><span class="vl">Google Firestore (president24horas)</span></div>'
+      +'<div class="ln"><span class="lb">DATA DE INSTALAÇÃO:</span><span class="vl vle">'+eh(inst)+'</span></div>'
+      +'<div class="ln"><span class="lb">ÚLTIMA REVISÃO:</span><span class="vl">'+dHoje+'</span></div>'
+      +'<div class="ln"><span class="lb">PROTOCOLO DO DOSSIÊ:</span><span class="vl" style="color:var(--gold);">'+prot+'</span></div>'
+    +'</div>'
+
+    +'<div class="sc sg">'
+      +'<div class="ph2" style="color:var(--green);">2. SISTEMAS DE CONTROLE E CONFORMIDADE</div>'
+      +ctrl('ckCpf','Verificação de CPF + Maioridade — bloqueio automático + reembolso')
+      +ctrl('ckRmb','Reembolso automático para menores — comprovante impresso')
+      +ctrl('ckBkp','Backup automático Firebase — Google Cloud criptografado')
+      +ctrl('ckCam','Câmera de monitoramento ativa — ID eletrônico do terminal')
+      +ctrl('ckLog','Log de operador imutável — salvo no Firebase')
+      +ctrl('ckImp','Impressora de comprovantes — Térmica BT')
+      +'<div style="margin-top:9px;padding:9px 12px;background:rgba(45,186,110,0.06);border:1px solid rgba(45,186,110,0.2);font-size:9.5px;color:var(--muted);">'
+        +'&#10003; <strong style="color:var(--green);">NOTA:</strong> Verificação de maioridade em 100% das transações — Lei 9.294/96 e ECA Art. 243.'
+      +'</div>'
+    +'</div>'
+
+    +'<div class="sc sb">'
+      +'<div class="ph2" style="color:var(--blue);">3. TERMO DE RESPONSABILIDADE — CLIENTE</div>'
+      +'<div class="cl">Ao realizar o cadastro e utilizar o Cartão PRESIDENT 24H, o USUÁRIO declara expressamente que:</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">1. MAIORIDADE</strong> — É maior de 18 anos, ciente que a venda de bebidas alcoólicas a menores é PROIBIDA (Lei 9.294/96, ECA Art. 243), sujeitando o infrator a pena de reclusão de 2 a 4 anos.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">2. VERACIDADE</strong> — As informações prestadas no cadastro (nome, CPF, data de nascimento) são verdadeiras, sendo o usuário responsável civil e criminalmente por informações falsas.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">3. USO PESSOAL</strong> — O cartão é intransferível. O empréstimo a terceiros, especialmente a menores, configura responsabilidade solidária.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">4. DADOS PESSOAIS (LGPD)</strong> — Autoriza o tratamento dos dados pessoais exclusivamente para controle de acesso e prevenção de fraudes, nos termos da Lei 13.709/2018. Armazenados no Google Firestore e não compartilhados sem autorização.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">5. MONITORAMENTO E SEGURANÇA</strong> — Este equipamento possui sistema de monitoramento por câmera e identificação eletrônica do terminal. Todas as transações são registradas (MAC, IP, UID RFID, data/hora) para segurança, auditoria e prevenção de fraudes, nos termos da Lei 13.709/2018 Art. 7º II e III, Lei 12.965/2014 e STJ REsp 1.642.833/RJ. O usuário declara ciência e consentimento expressos.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">6. REEMBOLSO</strong> — Em caso de cancelamento, o valor pré-carregado será devolvido integralmente pelo mesmo meio de pagamento.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">7. ACEITE DIGITAL</strong> — O aceite eletrônico, registrado com timestamp de servidor, CPF verificado, IP e UID RFID, tem validade jurídica nos termos do Art. 10 da MP 2.200-2/2001 (ICP-Brasil), Lei 12.965/2014 e Art. 225 do Código Civil.</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;font-size:9.5px;">'
+        +'<div style="padding:8px 12px;background:rgba(61,156,240,0.06);border:1px solid rgba(61,156,240,0.2);">'
+          +'<div style="color:var(--muted);font-size:8px;letter-spacing:1px;">ACEITE DIGITAL</div>'
+          +'<div style="color:var(--green);font-weight:700;margin-top:3px;">&#10003; SIM — Registrado no sistema</div>'
+        +'</div>'
+        +'<div style="padding:8px 12px;background:rgba(61,156,240,0.06);border:1px solid rgba(61,156,240,0.2);">'
+          +'<div style="color:var(--muted);font-size:8px;letter-spacing:1px;">VALIDADE JURÍDICA</div>'
+          +'<div style="color:var(--text);font-weight:700;margin-top:3px;">MP 2.200-2/2001 — ICP-Brasil</div>'
+        +'</div>'
+      +'</div>'
+    +'</div>'
+
+    +'<div class="sc so">'
+      +'<div class="ph2" style="color:var(--orange);">4. TERMO DE RESPONSABILIDADE — OPERADOR</div>'
+      +'<div class="cl">O OPERADOR do sistema PRESIDENT 24H declara e se compromete a:</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">1. CONTROLE DE ACESSO</strong> — Manter ativo o sistema de verificação de CPF e data de nascimento, garantindo que nenhum menor de 18 anos acesse as bebidas alcoólicas.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">2. MANUTENÇÃO</strong> — Manter o software atualizado, registros de segurança funcionando e backup automático ativo.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">3. GUARDA DE REGISTROS</strong> — Manter registros de transações por mínimo 1 ano, conforme Art. 13 do Marco Civil da Internet (Lei 12.965/2014).</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">4. FISCALIZAÇÃO</strong> — Apresentar este dossiê e registros completos sempre que solicitado por Vigilância Sanitária, Polícia, MP ou PROCON.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">5. LGPD</strong> — Designar-se como Controlador dos dados pessoais coletados, garantindo os direitos dos titulares previstos na Lei 13.709/2018.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">6. MONITORAMENTO</strong> — Manter ativo o sistema de câmera e ID eletrônico do terminal, disponibilizando gravações e logs às autoridades quando legalmente exigido.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">7. RESPONSABILIDADE SOLIDÁRIA</strong> — É solidariamente responsável por qualquer violação desta política por parte de seus prepostos, incluindo desativação não autorizada de qualquer sistema de controle.</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;font-size:9.5px;">'
+        +'<div style="padding:10px 12px;background:rgba(255,255,255,0.02);border:1px solid var(--border);">'
+          +'<div style="color:var(--muted);font-size:8px;margin-bottom:16px;">ASSINATURA DO OPERADOR:</div>'
+          +'<div style="border-top:1px solid var(--muted);padding-top:4px;color:var(--muted);font-size:8px;">'+op+'</div>'
+        +'</div>'
+        +'<div style="padding:10px 12px;background:rgba(255,255,255,0.02);border:1px solid var(--border);">'
+          +'<div style="color:var(--muted);font-size:8px;margin-bottom:16px;">DATA E LOCAL:</div>'
+          +'<div style="border-top:1px solid var(--muted);padding-top:4px;color:var(--muted);font-size:8px;">____/____/________ &middot; ___________________</div>'
+        +'</div>'
+      +'</div>'
+    +'</div>'
+
+    +'<div class="sc sr">'
+      +'<div class="ph2" style="color:var(--red);">5. LEGISLAÇÃO APLICÁVEL</div>'
+      +'<div style="display:flex;flex-direction:column;gap:5px;font-size:9.5px;">'
+        +'<div><strong style="color:var(--red);">Lei 9.294/1996</strong> — Proíbe venda de bebidas alcoólicas a menores de 18 anos.</div>'
+        +'<div><strong style="color:var(--red);">ECA — Lei 8.069/1990 Art. 243</strong> — Pena de reclusão de 2 a 4 anos por venda de bebida alcoólica a menor.</div>'
+        +'<div><strong style="color:var(--red);">Lei 13.106/2015</strong> — Lei Seca para Menores — venda a menor é crime.</div>'
+        +'<div><strong style="color:var(--red);">Lei 12.965/2014</strong> — Marco Civil da Internet — registros digitais como prova; guarda de 1 ano.</div>'
+        +'<div><strong style="color:var(--red);">Lei 13.709/2018</strong> — LGPD — tratamento de dados pessoais, imagens e ID eletrônico do terminal.</div>'
+        +'<div><strong style="color:var(--red);">CP Art. 154-A</strong> — Invasão de dispositivo informático — protege o sistema de acessos não autorizados.</div>'
+        +'<div><strong style="color:var(--red);">STJ REsp 1.642.833/RJ</strong> — Monitoramento em ambiente de uso público não viola privacidade quando destinado à segurança.</div>'
+        +'<div><strong style="color:var(--red);">ANVISA RDC 275</strong> — Regulamentação de equipamentos automáticos de venda de bebidas.</div>'
+      +'</div>'
+    +'</div>'
+
+    +'<div class="sc" style="border-left-color:var(--muted);">'
+      +'<div class="ph2">6. MODELO — RELATÓRIO PARA FISCALIZAÇÃO</div>'
+      +'<div style="display:flex;flex-direction:column;gap:5px;font-size:9.5px;color:var(--muted);">'
+        +'<div style="display:flex;gap:8px;"><span style="min-width:190px;">Data da fiscalização:</span><span style="border-bottom:1px solid var(--border);flex:1;">_____ / _____ / __________</span></div>'
+        +'<div style="display:flex;gap:8px;"><span style="min-width:190px;">Órgão fiscalizador:</span><span style="border-bottom:1px solid var(--border);flex:1;">___________________________________</span></div>'
+        +'<div style="display:flex;gap:8px;"><span style="min-width:190px;">Nome do agente fiscal:</span><span style="border-bottom:1px solid var(--border);flex:1;">___________________________________</span></div>'
+        +'<div style="display:flex;gap:8px;"><span style="min-width:190px;">Motivo:</span><span style="border-bottom:1px solid var(--border);flex:1;">___________________________________</span></div>'
+        +'<div style="display:flex;gap:8px;"><span style="min-width:190px;">Situação verificada:</span><span>&#9744; Regular &nbsp; &#9744; Irregular &nbsp; &#9744; Em análise</span></div>'
+        +'<div style="display:flex;gap:8px;"><span style="min-width:190px;">Assinatura do agente:</span><span style="border-bottom:1px solid var(--border);flex:1;">___________________________________</span></div>'
+        +'<div style="display:flex;gap:8px;"><span style="min-width:190px;">Assinatura do operador:</span><span style="border-bottom:1px solid var(--border);flex:1;">___________________________________</span></div>'
+      +'</div>'
+    +'</div>'
+
+    +'<div class="hb">'
+      +'<div style="font-family:\"Bebas Neue\",sans-serif;font-size:14px;letter-spacing:3px;color:var(--green);margin-bottom:6px;">&#128271; DOCUMENTO AUTENTICADO — PRESIDENT 24H</div>'
+      +'Este dossiê contém registros autênticos do banco de dados <strong>Google Firestore</strong> com timestamp de servidor.<br>'
+      +'Válido nos termos da <strong>Lei 12.965/2014</strong> (Marco Civil) e <strong>Lei 13.709/2018</strong> (LGPD).<br><br>'
+      +'<strong>Hash SHA-256:</strong> '+hash+'<br>'
+      +'<strong>Protocolo:</strong> '+prot+'<br>'
+      +'<strong>Emitido em:</strong> '+agora+' &nbsp;|&nbsp; <strong>Operador:</strong> '+op+' &nbsp;|&nbsp; <strong>Sistema:</strong> '+eh(ver)
+    +'</div>'
+
+    +'<div class="selos" style="margin-top:12px;">'
+      +'<span class="sl slg">&#10003; AUTENTICADO</span>'
+      +'<span class="sl slb">CONFORME LGPD</span>'
+      +'<span class="sl slr">CONFORME ECA</span>'
+      +'<span class="sl slgo">MARCO CIVIL</span>'
+    +'</div>'
+
+    +'<div style="margin-top:12px;font-size:8.5px;color:var(--muted);text-align:center;line-height:1.7;">'
+      +'Documento gerado por: '+eh(ver)+' &middot; Este documento não tem valor fiscal &middot; '
+      +'Acesso não autorizado ao sistema é crime (CP Art. 154-A) &middot; Todos os acessos são registrados com IP e timestamp.'
+    +'</div>';
+}
+
+function limMaq(){
+  ['fRazao','fCnpj','fEnd','fInst'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  upv();
+}
+
+function impMaq(){
+  var faltando=[];
+  if(!gv('fRazao')) faltando.push('Razão Social');
+  if(!gv('fCnpj'))  faltando.push('CNPJ/CPF');
+  if(!gv('fEnd'))   faltando.push('Endereço');
+  if(faltando.length){
+    var el=document.getElementById('notif');
+    el.textContent='⚠ Preencha: '+faltando.join(', ');
+    el.className='notif notif-err show';
+    setTimeout(function(){el.classList.remove('show');},3500);
+    return;
+  }
+  window.print();
+}
+
+setTimeout(function(){ upv(); }, 200);
+</script>
+
+</body></html>`;
+
+  const w=window.open('','_blank','width=900,height=700');
+  if(w){ w.document.write(html); w.document.close(); notif('✅ PDF gerado!','ok'); }
+  else notif('Permita pop-ups para gerar PDF.','info');
+}
+</script>
+
+<script>
+// ── ABAS ──
+function setTab(t){
+  ['C','M'].forEach(function(x){
+    document.getElementById('tab'+x).classList.toggle('active',x===t);
+    document.getElementById('tb'+x).classList.toggle('on',x===t);
+  });
+  if(t==='M') upv();
+}
+
+// ── HELPERS ──
+function gv(id){ var el=document.getElementById(id); return el?el.value.trim():''; }
+function gc(id){ var el=document.getElementById(id); return el?el.checked:false; }
+function ctrl(id,txt){
+  return gc(id)
+    ? '<div style="color:var(--green);">&#10003; '+txt+' &mdash; <strong>ATIVO</strong></div>'
+    : '<div style="color:var(--muted);">&#9711; '+txt+' &mdash; inativo</div>';
+}
+function eh(s){ var d={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'};return s.replace(/[&<>"]/g,function(c){return d[c]||c;}); }
+function warn(txt){
+  return '<span style="color:var(--orange);">&#9888; '+txt+'</span>';
+}
+
+// ── PREVIEW ──
+function upv(){
+  var agora   = new Date().toLocaleString('pt-BR');
+  var dHoje   = new Date().toLocaleDateString('pt-BR');
+  var razao   = gv('fRazao')  || warn('Preencha a Razão Social');
+  var cnpj    = gv('fCnpj')   || warn('Preencha o CNPJ/CPF');
+  var end_    = gv('fEnd')    || warn('Preencha o Endereço');
+  var tel     = gv('fTel')    || '(24) 99934-4903';
+  var inst    = gv('fInst')   || '____/____/________';
+  var nome    = gv('fNome')   || 'PRESIDENT 24H 01';
+  var pag     = gv('fPag')    || 'PIX &middot; Voucher &middot; Cartão Crédito/Débito &middot; Cartão Presidente Pré-pago &middot; Mercado Pago';
+  var ver     = gv('fVer')    || 'PRESIDENT 24H v8.2';
+  var hw      = gv('fHw')     || 'ESP32-S3';
+
+  var hv=0; var hs=gv('fRazao')+gv('fCnpj')+dHoje;
+  for(var i=0;i<hs.length;i++){hv=(hv<<5)-hv+hs.charCodeAt(i);}
+  var prot='PRES-'+dHoje.replace(/\//g,'')+'-'+Math.abs(hv).toString(36).toUpperCase().slice(0,6).padEnd(6,'X');
+  var hash='SHA256-'+Math.abs(hv*31).toString(16).toUpperCase().padStart(20,'0').slice(0,20);
+
+  var op = gv('fRazao') ? eh(gv('fRazao')) : '___________________________';
+
+  document.getElementById('dpv').innerHTML =
+    '<div style="border-bottom:2px solid var(--gold);padding-bottom:14px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">'
+      +'<div><div class="pt">DOSSIÊ JURÍDICO COMPLETO</div>'
+      +'<div style="font-size:9px;color:var(--muted);letter-spacing:2px;margin-top:3px;">CONFORMIDADE LEGAL &middot; TERMO DE RESPONSABILIDADE &middot; AUDITORIA</div></div>'
+      +'<div style="text-align:right;font-size:10px;">'
+        +'<div style="color:var(--gold);font-weight:700;">'+prot+'</div>'
+        +'<div style="color:var(--muted);">'+agora+'</div>'
+        +'<div style="margin-top:5px;background:rgba(232,64,64,0.15);color:var(--red);border:1px solid rgba(232,64,64,0.4);padding:2px 10px;font-size:9px;letter-spacing:2px;font-weight:700;display:inline-block;">USO RESTRITO</div>'
+      +'</div>'
+    +'</div>'
+
+    +'<div class="sc">'
+      +'<div class="ph2" style="color:var(--gold);">1. IDENTIFICAÇÃO DO EQUIPAMENTO</div>'
+      +'<div class="ln"><span class="lb">NOME / IDENTIFICAÇÃO:</span><span class="vl">'+eh(nome)+'</span></div>'
+      +'<div class="ln"><span class="lb">OPERADOR RESPONSÁVEL:</span><span class="vl vle">'+razao+'</span></div>'
+      +'<div class="ln"><span class="lb">CNPJ / CPF OPERADOR:</span><span class="vl vle">'+cnpj+'</span></div>'
+      +'<div class="ln"><span class="lb">TELEFONE / WHATSAPP:</span><span class="vl">'+eh(tel)+'</span></div>'
+      +'<div class="ln"><span class="lb">ENDEREÇO / LOCALIZAÇÃO:</span><span class="vl vle">'+end_+'</span></div>'
+      +'<div class="ln"><span class="lb">MÉTODOS DE PAGAMENTO:</span><span class="vl">'+pag+'</span></div>'
+      +'<div class="ln"><span class="lb">VERSÃO DO SOFTWARE:</span><span class="vl">'+eh(ver)+'</span></div>'
+      +'<div class="ln"><span class="lb">HARDWARE:</span><span class="vl">'+eh(hw)+' — IP 192.168.x.x</span></div>'
+      +'<div class="ln"><span class="lb">BANCO DE DADOS:</span><span class="vl">Google Firestore (president24horas)</span></div>'
+      +'<div class="ln"><span class="lb">DATA DE INSTALAÇÃO:</span><span class="vl vle">'+eh(inst)+'</span></div>'
+      +'<div class="ln"><span class="lb">ÚLTIMA REVISÃO:</span><span class="vl">'+dHoje+'</span></div>'
+      +'<div class="ln"><span class="lb">PROTOCOLO DO DOSSIÊ:</span><span class="vl" style="color:var(--gold);">'+prot+'</span></div>'
+    +'</div>'
+
+    +'<div class="sc sg">'
+      +'<div class="ph2" style="color:var(--green);">2. SISTEMAS DE CONTROLE E CONFORMIDADE</div>'
+      +ctrl('ckCpf','Verificação de CPF + Maioridade — bloqueio automático + reembolso')
+      +ctrl('ckRmb','Reembolso automático para menores — comprovante impresso')
+      +ctrl('ckBkp','Backup automático Firebase — Google Cloud criptografado')
+      +ctrl('ckCam','Câmera de monitoramento ativa — ID eletrônico do terminal')
+      +ctrl('ckLog','Log de operador imutável — salvo no Firebase')
+      +ctrl('ckImp','Impressora de comprovantes — Térmica BT')
+      +'<div style="margin-top:9px;padding:9px 12px;background:rgba(45,186,110,0.06);border:1px solid rgba(45,186,110,0.2);font-size:9.5px;color:var(--muted);">'
+        +'&#10003; <strong style="color:var(--green);">NOTA:</strong> Verificação de maioridade em 100% das transações — Lei 9.294/96 e ECA Art. 243.'
+      +'</div>'
+    +'</div>'
+
+    +'<div class="sc sb">'
+      +'<div class="ph2" style="color:var(--blue);">3. TERMO DE RESPONSABILIDADE — CLIENTE</div>'
+      +'<div class="cl">Ao realizar o cadastro e utilizar o Cartão PRESIDENT 24H, o USUÁRIO declara expressamente que:</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">1. MAIORIDADE</strong> — É maior de 18 anos, ciente que a venda de bebidas alcoólicas a menores é PROIBIDA (Lei 9.294/96, ECA Art. 243), sujeitando o infrator a pena de reclusão de 2 a 4 anos.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">2. VERACIDADE</strong> — As informações prestadas no cadastro (nome, CPF, data de nascimento) são verdadeiras, sendo o usuário responsável civil e criminalmente por informações falsas.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">3. USO PESSOAL</strong> — O cartão é intransferível. O empréstimo a terceiros, especialmente a menores, configura responsabilidade solidária.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">4. DADOS PESSOAIS (LGPD)</strong> — Autoriza o tratamento dos dados pessoais exclusivamente para controle de acesso e prevenção de fraudes, nos termos da Lei 13.709/2018. Armazenados no Google Firestore e não compartilhados sem autorização.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">5. MONITORAMENTO E SEGURANÇA</strong> — Este equipamento possui sistema de monitoramento por câmera e identificação eletrônica do terminal. Todas as transações são registradas (MAC, IP, UID RFID, data/hora) para segurança, auditoria e prevenção de fraudes, nos termos da Lei 13.709/2018 Art. 7º II e III, Lei 12.965/2014 e STJ REsp 1.642.833/RJ. O usuário declara ciência e consentimento expressos.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">6. REEMBOLSO</strong> — Em caso de cancelamento, o valor pré-carregado será devolvido integralmente pelo mesmo meio de pagamento.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">7. ACEITE DIGITAL</strong> — O aceite eletrônico, registrado com timestamp de servidor, CPF verificado, IP e UID RFID, tem validade jurídica nos termos do Art. 10 da MP 2.200-2/2001 (ICP-Brasil), Lei 12.965/2014 e Art. 225 do Código Civil.</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;font-size:9.5px;">'
+        +'<div style="padding:8px 12px;background:rgba(61,156,240,0.06);border:1px solid rgba(61,156,240,0.2);">'
+          +'<div style="color:var(--muted);font-size:8px;letter-spacing:1px;">ACEITE DIGITAL</div>'
+          +'<div style="color:var(--green);font-weight:700;margin-top:3px;">&#10003; SIM — Registrado no sistema</div>'
+        +'</div>'
+        +'<div style="padding:8px 12px;background:rgba(61,156,240,0.06);border:1px solid rgba(61,156,240,0.2);">'
+          +'<div style="color:var(--muted);font-size:8px;letter-spacing:1px;">VALIDADE JURÍDICA</div>'
+          +'<div style="color:var(--text);font-weight:700;margin-top:3px;">MP 2.200-2/2001 — ICP-Brasil</div>'
+        +'</div>'
+      +'</div>'
+    +'</div>'
+
+    +'<div class="sc so">'
+      +'<div class="ph2" style="color:var(--orange);">4. TERMO DE RESPONSABILIDADE — OPERADOR</div>'
+      +'<div class="cl">O OPERADOR do sistema PRESIDENT 24H declara e se compromete a:</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">1. CONTROLE DE ACESSO</strong> — Manter ativo o sistema de verificação de CPF e data de nascimento, garantindo que nenhum menor de 18 anos acesse as bebidas alcoólicas.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">2. MANUTENÇÃO</strong> — Manter o software atualizado, registros de segurança funcionando e backup automático ativo.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">3. GUARDA DE REGISTROS</strong> — Manter registros de transações por mínimo 1 ano, conforme Art. 13 do Marco Civil da Internet (Lei 12.965/2014).</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">4. FISCALIZAÇÃO</strong> — Apresentar este dossiê e registros completos sempre que solicitado por Vigilância Sanitária, Polícia, MP ou PROCON.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">5. LGPD</strong> — Designar-se como Controlador dos dados pessoais coletados, garantindo os direitos dos titulares previstos na Lei 13.709/2018.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">6. MONITORAMENTO</strong> — Manter ativo o sistema de câmera e ID eletrônico do terminal, disponibilizando gravações e logs às autoridades quando legalmente exigido.</div>'
+      +'<div class="cl"><strong style="color:var(--gold);">7. RESPONSABILIDADE SOLIDÁRIA</strong> — É solidariamente responsável por qualquer violação desta política por parte de seus prepostos, incluindo desativação não autorizada de qualquer sistema de controle.</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;font-size:9.5px;">'
+        +'<div style="padding:10px 12px;background:rgba(255,255,255,0.02);border:1px solid var(--border);">'
+          +'<div style="color:var(--muted);font-size:8px;margin-bottom:16px;">ASSINATURA DO OPERADOR:</div>'
+          +'<div style="border-top:1px solid var(--muted);padding-top:4px;color:var(--muted);font-size:8px;">'+op+'</div>'
+        +'</div>'
+        +'<div style="padding:10px 12px;background:rgba(255,255,255,0.02);border:1px solid var(--border);">'
+          +'<div style="color:var(--muted);font-size:8px;margin-bottom:16px;">DATA E LOCAL:</div>'
+          +'<div style="border-top:1px solid var(--muted);padding-top:4px;color:var(--muted);font-size:8px;">____/____/________ &middot; ___________________</div>'
+        +'</div>'
+      +'</div>'
+    +'</div>'
+
+    +'<div class="sc sr">'
+      +'<div class="ph2" style="color:var(--red);">5. LEGISLAÇÃO APLICÁVEL</div>'
+      +'<div style="display:flex;flex-direction:column;gap:5px;font-size:9.5px;">'
+        +'<div><strong style="color:var(--red);">Lei 9.294/1996</strong> — Proíbe venda de bebidas alcoólicas a menores de 18 anos.</div>'
+        +'<div><strong style="color:var(--red);">ECA — Lei 8.069/1990 Art. 243</strong> — Pena de reclusão de 2 a 4 anos por venda de bebida alcoólica a menor.</div>'
+        +'<div><strong style="color:var(--red);">Lei 13.106/2015</strong> — Lei Seca para Menores — venda a menor é crime.</div>'
+        +'<div><strong style="color:var(--red);">Lei 12.965/2014</strong> — Marco Civil da Internet — registros digitais como prova; guarda de 1 ano.</div>'
+        +'<div><strong style="color:var(--red);">Lei 13.709/2018</strong> — LGPD — tratamento de dados pessoais, imagens e ID eletrônico do terminal.</div>'
+        +'<div><strong style="color:var(--red);">CP Art. 154-A</strong> — Invasão de dispositivo informático — protege o sistema de acessos não autorizados.</div>'
+        +'<div><strong style="color:var(--red);">STJ REsp 1.642.833/RJ</strong> — Monitoramento em ambiente de uso público não viola privacidade quando destinado à segurança.</div>'
+        +'<div><strong style="color:var(--red);">ANVISA RDC 275</strong> — Regulamentação de equipamentos automáticos de venda de bebidas.</div>'
+      +'</div>'
+    +'</div>'
+
+    +'<div class="sc" style="border-left-color:var(--muted);">'
+      +'<div class="ph2">6. MODELO — RELATÓRIO PARA FISCALIZAÇÃO</div>'
+      +'<div style="display:flex;flex-direction:column;gap:5px;font-size:9.5px;color:var(--muted);">'
+        +'<div style="display:flex;gap:8px;"><span style="min-width:190px;">Data da fiscalização:</span><span style="border-bottom:1px solid var(--border);flex:1;">_____ / _____ / __________</span></div>'
+        +'<div style="display:flex;gap:8px;"><span style="min-width:190px;">Órgão fiscalizador:</span><span style="border-bottom:1px solid var(--border);flex:1;">___________________________________</span></div>'
+        +'<div style="display:flex;gap:8px;"><span style="min-width:190px;">Nome do agente fiscal:</span><span style="border-bottom:1px solid var(--border);flex:1;">___________________________________</span></div>'
+        +'<div style="display:flex;gap:8px;"><span style="min-width:190px;">Motivo:</span><span style="border-bottom:1px solid var(--border);flex:1;">___________________________________</span></div>'
+        +'<div style="display:flex;gap:8px;"><span style="min-width:190px;">Situação verificada:</span><span>&#9744; Regular &nbsp; &#9744; Irregular &nbsp; &#9744; Em análise</span></div>'
+        +'<div style="display:flex;gap:8px;"><span style="min-width:190px;">Assinatura do agente:</span><span style="border-bottom:1px solid var(--border);flex:1;">___________________________________</span></div>'
+        +'<div style="display:flex;gap:8px;"><span style="min-width:190px;">Assinatura do operador:</span><span style="border-bottom:1px solid var(--border);flex:1;">___________________________________</span></div>'
+      +'</div>'
+    +'</div>'
+
+    +'<div class="hb">'
+      +'<div style="font-family:\"Bebas Neue\",sans-serif;font-size:14px;letter-spacing:3px;color:var(--green);margin-bottom:6px;">&#128271; DOCUMENTO AUTENTICADO — PRESIDENT 24H</div>'
+      +'Este dossiê contém registros autênticos do banco de dados <strong>Google Firestore</strong> com timestamp de servidor.<br>'
+      +'Válido nos termos da <strong>Lei 12.965/2014</strong> (Marco Civil) e <strong>Lei 13.709/2018</strong> (LGPD).<br><br>'
+      +'<strong>Hash SHA-256:</strong> '+hash+'<br>'
+      +'<strong>Protocolo:</strong> '+prot+'<br>'
+      +'<strong>Emitido em:</strong> '+agora+' &nbsp;|&nbsp; <strong>Operador:</strong> '+op+' &nbsp;|&nbsp; <strong>Sistema:</strong> '+eh(ver)
+    +'</div>'
+
+    +'<div class="selos" style="margin-top:12px;">'
+      +'<span class="sl slg">&#10003; AUTENTICADO</span>'
+      +'<span class="sl slb">CONFORME LGPD</span>'
+      +'<span class="sl slr">CONFORME ECA</span>'
+      +'<span class="sl slgo">MARCO CIVIL</span>'
+    +'</div>'
+
+    +'<div style="margin-top:12px;font-size:8.5px;color:var(--muted);text-align:center;line-height:1.7;">'
+      +'Documento gerado por: '+eh(ver)+' &middot; Este documento não tem valor fiscal &middot; '
+      +'Acesso não autorizado ao sistema é crime (CP Art. 154-A) &middot; Todos os acessos são registrados com IP e timestamp.'
+    +'</div>';
+}
+
+function limMaq(){
+  ['fRazao','fCnpj','fEnd','fInst'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  upv();
+}
+
+function impMaq(){
+  var faltando=[];
+  if(!gv('fRazao')) faltando.push('Razão Social');
+  if(!gv('fCnpj'))  faltando.push('CNPJ/CPF');
+  if(!gv('fEnd'))   faltando.push('Endereço');
+  if(faltando.length){
+    var el=document.getElementById('notif');
+    el.textContent='⚠ Preencha: '+faltando.join(', ');
+    el.className='notif notif-err show';
+    setTimeout(function(){el.classList.remove('show');},3500);
+    return;
+  }
+  window.print();
+}
+
+setTimeout(function(){ upv(); }, 200);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Code — President 24H</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Barlow Condensed', sans-serif;
+    background: #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    gap: 40px;
+  }
+
+  /* ── EDITOR PANEL ── */
+  .editor {
+    background: #222;
+    border: 1px solid #333;
+    border-radius: 16px;
+    padding: 24px 28px;
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .editor h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    color: #c8a020;
+    margin-bottom: 4px;
+  }
+  .editor label {
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    color: #6a7080;
+    display: block;
+    margin-bottom: 5px;
+  }
+  .editor input[type="text"], .editor input[type="url"] {
+    width: 100%;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 11px 14px;
+    color: #e8e8e8;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .editor input:focus { border-color: #c8a020; }
+  .btn-generate {
+    background: linear-gradient(135deg, #c8a020, #f0cc55);
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    color: #000;
+    cursor: pointer;
+    transition: opacity .2s;
+    margin-top: 4px;
+  }
+  .btn-generate:hover { opacity: .85; }
+
+  /* ── PRINT CARD ── */
+  .print-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .card {
+    width: 320px;
+    background: #06080a;
+    border-radius: 24px;
+    border: 1.5px solid rgba(200,160,32,.35);
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px #ffffff06,
+      0 30px 80px rgba(0,0,0,.8),
+      0 0 60px rgba(200,160,32,.06);
+    position: relative;
+  }
+
+  /* gold top stripe */
+  .card-stripe {
+    height: 5px;
+    background: linear-gradient(90deg, #7a5c0a, #c8a020, #f0cc55, #c8a020, #7a5c0a);
+  }
+
+  .card-body {
+    padding: 28px 28px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* logo / brand */
+  .brand-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .brand-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, #7a5c0a, #c8a020);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+  }
+  .brand-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.9rem;
+    letter-spacing: 5px;
+    color: #c8a020;
+    line-height: 1;
+  }
+  .brand-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 4px;
+    color: rgba(200,160,32,.5);
+    margin-bottom: 20px;
+  }
+
+  /* divider */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(200,160,32,.3), transparent);
+    margin-bottom: 20px;
+  }
+
+  /* QR box */
+  .qr-box {
+    background: #fff;
+    border-radius: 14px;
+    padding: 12px;
+    box-shadow: 0 0 40px rgba(200,160,32,.15);
+    margin-bottom: 20px;
+  }
+  #qrcode canvas, #qrcode img {
+    display: block;
+    border-radius: 6px;
+  }
+
+  /* instruction */
+  .instruction {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 4px;
+    color: #e8e8e8;
+    margin-bottom: 4px;
+  }
+  .instruction-sub {
+    font-size: 0.72rem;
+    color: #4a5060;
+    letter-spacing: 2px;
+    font-family: 'Share Tech Mono', monospace;
+    text-align: center;
+  }
+
+  /* bottom stripe */
+  .card-bottom {
+    padding: 12px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid rgba(255,255,255,.05);
+  }
+  .card-url {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    color: rgba(200,160,32,.35);
+    letter-spacing: 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 230px;
+  }
+  .card-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    color: #18e070;
+    background: rgba(24,224,112,.08);
+    border: 1px solid rgba(24,224,112,.2);
+    border-radius: 6px;
+    padding: 3px 8px;
+    white-space: nowrap;
+  }
+
+  /* corner decoration */
+  .card::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; right: -30px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(200,160,32,.04), transparent);
+    pointer-events: none;
+  }
+
+  /* ── BUTTONS ── */
+  .actions {
+    display: flex;
+    gap: 12px;
+  }
+  .btn-action {
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all .2s;
+    border: none;
+  }
+  .btn-print {
+    background: linear-gradient(135deg, #c8a020, #f0cc55);
+    color: #000;
+  }
+  .btn-print:hover { opacity: .85; }
+  .btn-save {
+    background: transparent;
+    border: 1px solid rgba(200,160,32,.35) !important;
+    color: #c8a020;
+  }
+  .btn-save:hover { background: rgba(200,160,32,.08); }
+
+  /* github guide */
+  .guide {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 16px;
+    padding: 24px 28px;
+    width: 100%;
+    max-width: 500px;
+  }
+  .guide h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 3px;
+    color: #c8a020;
+    font-size: 1rem;
+    margin-bottom: 16px;
+  }
+  .step {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+  .step-num {
+    width: 26px; height: 26px;
+    border-radius: 8px;
+    background: rgba(200,160,32,.15);
+    border: 1px solid rgba(200,160,32,.3);
+    color: #c8a020;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-text {
+    font-size: 0.88rem;
+    color: #9aa0b0;
+    line-height: 1.5;
+  }
+  .step-text strong { color: #e8e8e8; font-weight: 600; }
+  .step-text code {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    background: #1a1e28;
+    border: 1px solid #2a3040;
+    border-radius: 5px;
+    padding: 1px 7px;
+    color: #f0cc55;
+  }
+
+  /* ── PRINT STYLES ── */
+  @media print {
+    body { background: white; padding: 0; min-height: auto; }
+    .editor, .actions, .guide { display: none !important; }
+    .print-wrap { gap: 0; }
+    .card {
+      border-radius: 0;
+      border: none;
+      box-shadow: none;
+      width: 100%;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+    .card-stripe { background: #c8a020; }
+    .brand-name { color: #000 !important; }
+    .brand-sub, .card-url, .instruction-sub { color: #555 !important; }
+    .qr-box { box-shadow: none; border: 2px solid #000; }
+    .instruction { color: #000; }
+    .card-body { background: white; }
+    .card-bottom { border-color: #ddd; background: #f5f5f5; }
+    .card-badge { border-color: #18a060; color: #18a060; background: transparent; }
+    .brand-icon { background: #c8a020; }
+    .divider { background: #ccc; }
+  }
+</style>
+</head>
+<body>
+
+<!-- EDITOR -->
+<div class="editor">
+  <h3>⚙ Configurar QR Code</h3>
+
+  <div>
+    <label>URL DO APP (GitHub Pages)</label>
+    <input type="url" id="inp-url"
+      placeholder="https://seuusuario.github.io/president24h/app_president_prototipo.html"
+      value="https://seuusuario.github.io/president24h/app_president_prototipo.html">
+  </div>
+
+  <div>
+    <label>TEXTO DO RODAPÉ</label>
+    <input type="text" id="inp-footer" placeholder="ESCANEIE PARA PEDIR SEU CHOPP" value="ESCANEIE PARA PEDIR SEU CHOPP">
+  </div>
+
+  <button class="btn-generate" onclick="generate()">🍺 GERAR QR CODE</button>
+</div>
+
+<!-- CARD DE IMPRESSÃO -->
+<div class="print-wrap">
+  <div class="card" id="card">
+    <div class="card-stripe"></div>
+    <div class="card-body">
+      <div class="brand-row">
+        <div class="brand-icon">🍺</div>
+        <div class="brand-name">PRESIDENT</div>
+      </div>
+      <div class="brand-sub">CHOPP GELADO 24 HORAS</div>
+      <div class="divider"></div>
+      <div class="qr-box">
+        <div id="qrcode"></div>
+      </div>
+      <div class="instruction">ESCANEIE PARA PEDIR SEU CHOPP</div>
+      <div class="instruction-sub" id="sub-text">APONTE A CÂMERA DO CELULAR PARA O CÓDIGO</div>
+    </div>
+    <div class="card-bottom">
+      <span class="card-url" id="url-display">github.io/president24h</span>
+      <span class="card-badge">● ONLINE 24H</span>
+    </div>
+  </div>
+
+  <!-- AÇÕES -->
+  <div class="actions">
+    <button class="btn-action btn-print" onclick="window.print()">🖨 IMPRIMIR</button>
+    <button class="btn-action btn-save" onclick="saveImage()">💾 SALVAR PNG</button>
+  </div>
+</div>
+
+<!-- GUIA GITHUB PAGES -->
+<div class="guide">
+  <h3>📂 Como hospedar no GitHub (passo a passo)</h3>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-text">
+      Crie uma conta em <strong>github.com</strong> (se ainda não tiver) e crie um repositório novo chamado <code>president24h</code>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-text">
+      Faça upload do arquivo <code>app_president_prototipo.html</code> e do seu <code>.ino</code> para o repositório. Pode usar o botão <strong>"Add file → Upload files"</strong> no GitHub.
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-text">
+      No repositório, vá em <strong>Settings → Pages</strong>. Em "Branch", selecione <strong>main</strong> e clique em <strong>Save</strong>.
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-text">
+      Aguarde ~1 minuto. Sua URL será:<br>
+      <code>https://SEU_USUARIO.github.io/president24h/app_president_prototipo.html</code>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-text">
+      Cole essa URL no campo acima, clique em <strong>Gerar QR Code</strong> e imprima o cartão para colar na máquina. ✅
+    </div>
+  </div>
+</div>
+
+<script>
+// Gera QR inicial
+let currentUrl = document.getElementById('inp-url').value;
+
+function generate() {
+  const url = document.getElementById('inp-url').value.trim();
+  const footer = document.getElementById('inp-footer').value.trim();
+
+  if (!url) { alert('Cole a URL do app!'); return; }
+
+  currentUrl = url;
+
+  // Atualiza rodapé
+  document.getElementById('sub-text').textContent = 'APONTE A CÂMERA DO CELULAR PARA O CÓDIGO';
+  document.querySelector('.instruction').textContent = footer || 'ESCANEIE PARA PEDIR SEU CHOPP';
+
+  // Atualiza URL no rodapé do card
+  try {
+    const u = new URL(url);
+    document.getElementById('url-display').textContent = u.hostname + u.pathname;
+  } catch(e) {
+    document.getElementById('url-display').textContent = url;
+  }
+
+  // Limpa e regera QR
+  const el = document.getElementById('qrcode');
+  el.innerHTML = '';
+  new QRCode(el, {
+    text: url,
+    width: 200,
+    height: 200,
+    colorDark: '#000000',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+}
+
+// Gera ao carregar
+window.addEventListener('load', generate);
+
+// Salvar como imagem (canvas)
+async function saveImage() {
+  const card = document.getElementById('card');
+
+  // Tenta usar html2canvas se disponível, senão instrui o usuário
+  if (typeof html2canvas !== 'undefined') {
+    const canvas = await html2canvas(card, { backgroundColor: '#06080a', scale: 2 });
+    const link = document.createElement('a');
+    link.download = 'qrcode-president24h.png';
+    link.href = canvas.toDataURL();
+    link.click();
+  } else {
+    alert('Para salvar como imagem, use Ctrl+P → Salvar como PDF, ou faça uma captura de tela do cartão acima.');
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRESIDENT 24H — Painel Operador</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0c0f;--panel:#111418;--border:#1e2530;--gold:#d4a017;--gold2:#f0c040;--red:#e84040;--green:#2dba6e;--blue:#3d9cf0;--orange:#f07a20;--text:#c8d0dc;--muted:#5a6478;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:13px;min-height:100vh;}
+
+  /* LOGIN */
+  #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);position:fixed;inset:0;z-index:1000;}
+  .login-box{background:var(--panel);border:1px solid var(--blue);padding:48px 40px;width:380px;position:relative;box-shadow:0 0 60px rgba(61,156,240,0.15);}
+  .login-box::before{content:'';position:absolute;top:-1px;left:30px;right:30px;height:2px;background:linear-gradient(90deg,transparent,var(--blue),transparent);}
+  .login-logo{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:4px;color:var(--gold);text-align:center;line-height:1;margin-bottom:4px;}
+  .login-sub{text-align:center;color:var(--muted);font-size:11px;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;font-family:'IBM Plex Mono',monospace;}
+  .login-role{text-align:center;background:rgba(61,156,240,0.15);border:1px solid rgba(61,156,240,0.4);color:var(--blue);font-size:10px;letter-spacing:3px;text-transform:uppercase;padding:4px 12px;font-family:'IBM Plex Mono',monospace;margin-bottom:28px;display:inline-block;width:100%;}
+  .login-field{margin-bottom:16px;}
+  .login-field label{display:block;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-family:'IBM Plex Mono',monospace;}
+  .login-field input{width:100%;background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--text);padding:12px 14px;font-family:'IBM Plex Mono',monospace;font-size:13px;outline:none;transition:border-color .2s;}
+  .login-field input:focus{border-color:var(--blue);}
+  .btn-login{width:100%;background:var(--blue);color:#000;border:none;padding:14px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;cursor:pointer;margin-top:8px;transition:opacity .2s;}
+  .btn-login:hover{opacity:.85;}
+  #loginError{color:var(--red);text-align:center;font-size:11px;margin-top:12px;font-family:'IBM Plex Mono',monospace;display:none;}
+
+  /* ROLE BADGE */
+  .role-badge{background:rgba(61,156,240,0.15);border:1px solid rgba(61,156,240,0.4);color:var(--blue);font-size:9px;letter-spacing:2px;padding:2px 8px;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;}
+
+  /* APP */
+  #app{display:none;}
+  .topbar{background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:52px;position:sticky;top:0;z-index:100;}
+  .topbar-brand{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:4px;color:var(--gold);display:flex;align-items:center;gap:10px;}
+  .topbar-status{display:flex;align-items:center;gap:16px;}
+  .status-dot{display:flex;align-items:center;gap:6px;font-size:11px;font-family:'IBM Plex Mono',monospace;}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+  .dot.red{background:var(--red);animation:none;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+  .topbar-clock{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);}
+  .btn-logout{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 14px;font-size:11px;cursor:pointer;font-family:'IBM Plex Mono',monospace;transition:all .2s;}
+  .btn-logout:hover{border-color:var(--red);color:var(--red);}
+
+  /* IP BANNER */
+  #configBanner{background:rgba(61,156,240,0.08);border-bottom:1px solid rgba(61,156,240,0.2);padding:8px 24px;display:flex;align-items:center;gap:12px;font-size:11px;font-family:'IBM Plex Mono',monospace;}
+  #configBanner span{color:var(--muted);}
+  #configBanner input{background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text);padding:5px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;width:180px;outline:none;}
+  #configBanner input:focus{border-color:var(--blue);}
+  .btn-sm{padding:5px 12px;border:none;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11px;transition:opacity .2s;}
+  .btn-sm:hover{opacity:.8;}
+  .btn-blue-sm{background:var(--blue);color:#000;}
+  #connectionStatus{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-family:'IBM Plex Mono',monospace;padding:3px 10px;border:1px solid;}
+  #connectionStatus.online{color:var(--green);border-color:rgba(45,186,110,0.4);background:rgba(45,186,110,0.06);}
+  #connectionStatus.offline{color:var(--red);border-color:rgba(232,64,64,0.4);background:rgba(232,64,64,0.06);}
+  #connectionStatus.demo{color:var(--orange);border-color:rgba(240,122,32,0.4);background:rgba(240,122,32,0.06);}
+
+  .layout{display:flex;min-height:calc(100vh - 88px);}
+  .sidebar{width:200px;background:var(--panel);border-right:1px solid var(--border);flex-shrink:0;padding:20px 0;}
+  .nav-section{padding:0 0 16px 0;margin-bottom:8px;border-bottom:1px solid var(--border);}
+  .nav-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:0 18px 8px;font-family:'IBM Plex Mono',monospace;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 18px;cursor:pointer;color:var(--muted);transition:all .15s;font-size:12px;border-left:2px solid transparent;}
+  .nav-item:hover{background:rgba(255,255,255,0.03);color:var(--text);}
+  .nav-item.active{color:var(--blue);border-left-color:var(--blue);background:rgba(61,156,240,0.05);}
+  .nav-item .icon{font-size:14px;width:18px;text-align:center;}
+  .content{flex:1;padding:24px;overflow-y:auto;}
+  .page{display:none;}
+  .page.active{display:block;}
+  .page-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:24px;}
+  .page-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;}
+
+  /* CARDS */
+  .grid{display:grid;gap:16px;}
+  .grid-4{grid-template-columns:repeat(4,1fr);}
+  .grid-3{grid-template-columns:repeat(3,1fr);}
+  .grid-2{grid-template-columns:repeat(2,1fr);}
+  .card{background:var(--panel);border:1px solid var(--border);padding:20px;}
+  .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .card-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+  .stat-value{font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:2px;line-height:1;margin-bottom:4px;}
+  .stat-label{font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+  .color-gold{color:var(--gold);}
+  .color-green{color:var(--green);}
+  .color-blue{color:var(--blue);}
+  .color-red{color:var(--red);}
+  .color-orange{color:var(--orange);}
+
+  /* ESTOQUE BARS */
+  .stock-item{margin-bottom:16px;}
+  .stock-header{display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;}
+  .stock-bar-bg{background:rgba(255,255,255,0.06);height:8px;}
+  .stock-bar{height:100%;transition:width .5s ease;}
+
+  /* ALERTAS */
+  .alert-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+  .alert-item:last-child{border-bottom:none;}
+  .alert-icon{font-size:16px;margin-top:2px;}
+  .alert-body{flex:1;}
+  .alert-title{font-size:12px;font-weight:600;margin-bottom:2px;}
+  .alert-time{font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+
+  /* BADGES */
+  .badge{font-size:10px;padding:2px 8px;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;text-transform:uppercase;}
+  .badge-red{background:rgba(232,64,64,0.15);color:var(--red);border:1px solid rgba(232,64,64,0.3);}
+  .badge-gold{background:rgba(212,160,23,0.15);color:var(--gold);border:1px solid rgba(212,160,23,0.3);}
+  .badge-green{background:rgba(45,186,110,0.15);color:var(--green);border:1px solid rgba(45,186,110,0.3);}
+  .badge-blue{background:rgba(61,156,240,0.15);color:var(--blue);border:1px solid rgba(61,156,240,0.3);}
+  .badge-orange{background:rgba(240,122,32,0.15);color:var(--orange);border:1px solid rgba(240,122,32,0.3);}
+
+  /* TABLE */
+  .table{width:100%;border-collapse:collapse;}
+  .table th{text-align:left;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-family:'IBM Plex Mono',monospace;padding:0 12px 12px;border-bottom:1px solid var(--border);}
+  .table td{padding:11px 12px;font-size:12px;border-bottom:1px solid rgba(30,37,48,0.5);font-family:'IBM Plex Mono',monospace;}
+  .table tr:last-child td{border-bottom:none;}
+  .table tr:hover td{background:rgba(255,255,255,0.02);}
+
+  /* REEMBOLSO ALERT */
+  .reemb-auto-alert{background:rgba(232,64,64,0.1);border:2px solid var(--red);padding:20px;margin-bottom:20px;animation:blink-border 1.5s infinite;}
+  .reemb-code{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold);letter-spacing:4px;background:rgba(212,160,23,0.1);border:1px solid rgba(212,160,23,0.3);padding:8px 16px;display:inline-block;margin:8px 0;}
+  @keyframes blink-border{0%,100%{border-color:rgba(232,64,64,0.4);}50%{border-color:rgba(232,64,64,0.9);}}
+
+  /* BUTTONS */
+  .btn-action{padding:8px 18px;border:none;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;transition:opacity .2s;}
+  .btn-action:hover{opacity:.85;}
+  .btn-red{background:var(--red);color:#fff;}
+  .btn-gold{background:var(--gold);color:#000;}
+  .btn-green{background:var(--green);color:#000;}
+  .btn-blue{background:var(--blue);color:#000;}
+
+  /* CMD INPUT */
+  .cmd-input{background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--text);padding:10px 12px;font-family:'IBM Plex Mono',monospace;font-size:12px;outline:none;}
+  .cmd-input:focus{border-color:var(--blue);}
+  .cmd-select{background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--text);padding:10px 12px;font-family:'IBM Plex Mono',monospace;font-size:12px;outline:none;}
+
+  /* WIFI WIDGET */
+  .wifi-widget{display:flex;align-items:center;gap:10px;background:rgba(45,186,110,0.06);border:1px solid rgba(45,186,110,0.2);padding:10px 14px;margin-bottom:16px;}
+  .wifi-info{flex:1;}
+  .wifi-ssid{font-size:12px;font-weight:600;}
+  .wifi-ip{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);}
+
+  /* ALERTA ESTOQUE */
+  .stock-alert{background:rgba(240,122,32,0.08);border:1px solid rgba(240,122,32,0.4);padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}
+  .stock-alert.critical{background:rgba(232,64,64,0.08);border-color:rgba(232,64,64,0.5);}
+
+  /* NOTIFICAÇÃO */
+  .notif-bar{background:rgba(232,64,64,0.12);border:1px solid var(--red);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;animation:blink-border 2s infinite;}
+  .notif-bar.warn{background:rgba(240,122,32,0.1);border-color:var(--orange);}
+
+  /* RESTRICTED OVERLAY */
+  .restricted-notice{background:rgba(61,156,240,0.06);border:1px solid rgba(61,156,240,0.3);padding:20px;text-align:center;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:20px;}
+
+  /* CARTÃO FORM */
+  .form-field{margin-bottom:14px;}
+  .form-field label{display:block;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-family:'IBM Plex Mono',monospace;}
+  .form-field input{width:100%;background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--text);padding:10px 12px;font-family:'IBM Plex Mono',monospace;font-size:13px;outline:none;transition:border-color .2s;}
+  .form-field input:focus{border-color:var(--blue);}
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar{width:4px;}
+  ::-webkit-scrollbar-track{background:var(--bg);}
+  ::-webkit-scrollbar-thumb{background:var(--border);}
+
+  @media(max-width:900px){.grid-4{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:600px){.sidebar{display:none}.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}}
+
+  /* GAUGE */
+  .gauge-row{display:flex;align-items:center;gap:16px;margin-bottom:12px;}
+  .gauge-label{font-size:12px;min-width:100px;}
+  .gauge-track{flex:1;height:8px;background:rgba(255,255,255,0.06);}
+  .gauge-fill{height:100%;transition:width .6s ease;}
+  .gauge-val{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);min-width:50px;text-align:right;}
+
+  /* OPERADOR ROLE TAG na sidebar */
+  .sidebar-role{margin:0 12px 16px;background:rgba(61,156,240,0.1);border:1px solid rgba(61,156,240,0.3);padding:8px 12px;text-align:center;}
+  .sidebar-role-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);}
+  .sidebar-role-name{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--text);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">🍺 PRESIDENT</div>
+    <div class="login-sub">Sistema 24H v8.1</div>
+    <div class="login-role">🔧 ACESSO OPERADOR</div>
+    <div class="login-field">
+      <label>Usuário</label>
+      <input type="text" id="inputUser" placeholder="operador" autocomplete="username"/>
+    </div>
+    <div class="login-field">
+      <label>Senha</label>
+      <input type="password" id="inputPass" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+    <div class="login-field" style="margin-bottom:0;">
+      <label>IP do ESP32</label>
+      <input type="text" id="inputIP" placeholder="192.168.1.50"/>
+    </div>
+    <button class="btn-login" onclick="doLogin()">ENTRAR</button>
+    <div id="loginError">⚠ Usuário ou senha incorretos</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- IP BANNER -->
+  <div id="configBanner">
+    <span>IP ESP32:</span>
+    <input type="text" id="espIPInput" placeholder="192.168.1.50" oninput="updateIP()"/>
+    <button class="btn-sm btn-blue-sm" onclick="fetchStatus()">↺ ATUALIZAR</button>
+    <div id="connectionStatus" class="demo">● DEMO</div>
+    <span style="margin-left:auto;font-size:10px;color:var(--muted);">Auto-atualiza a cada 8s</span>
+  </div>
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-brand">🍺 <span>PRESIDENT 24H</span> <span class="role-badge">OPERADOR</span></div>
+    <div class="topbar-status">
+      <div class="status-dot"><div class="dot" id="dotMachine"></div><span id="statusMachineLabel">MÁQUINA</span></div>
+      <div class="status-dot"><div class="dot" id="dotWifi"></div><span id="wifiLabel">WiFi</span></div>
+      <div class="topbar-clock" id="clock">--:--:--</div>
+      <button onclick="acionarBuzzer()" style="background:var(--red);color:#fff;border:none;padding:6px 14px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;margin-right:4px;" title="Buzzer de emergência">🔔 EMERGÊNCIA</button>
+      <button class="btn-logout" onclick="doLogout()">SAIR</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-role">
+        <div class="sidebar-role-label">Perfil</div>
+        <div class="sidebar-role-name" id="sidebarUserName">OPERADOR</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Principal</div>
+        <div class="nav-item active" onclick="goPage('dashboard',this)"><span class="icon">📊</span>Dashboard</div>
+        <div class="nav-item" onclick="goPage('alertas',this)"><span class="icon">🔔</span>Alertas<span id="alertBadge" style="margin-left:auto;background:var(--red);color:#fff;border-radius:10px;font-size:9px;padding:1px 6px;display:none;">0</span></div>
+        <div class="nav-item" onclick="goPage('estoque',this)"><span class="icon">📦</span>Estoque</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Reembolso</div>
+        <div class="nav-item" onclick="goPage('reembolso',this)"><span class="icon">💳</span>Reembolso<span id="reembBadge" style="margin-left:auto;background:var(--red);color:#fff;border-radius:10px;font-size:9px;padding:1px 6px;display:none;">!</span></div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Cartão President</div>
+        <div class="nav-item" onclick="goPage('camera',this)"><span class="icon">📷</span>Câmera</div>
+        <div class="nav-item" onclick="goPage('cartao',this)"><span class="icon">💳</span>Cartão President</div>
+      </div>
+      <div style="padding:16px 18px 0;font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;line-height:1.6;">
+        🔒 Acesso restrito.<br>Preço e calibração<br>são do gerente.
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ═══════════════════════════════ DASHBOARD ═══════════════════════════════ -->
+      <div id="page-dashboard" class="page active">
+        <div class="page-header">
+          <div class="page-title">DASHBOARD</div>
+          <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;" id="lastSync">—</div>
+        </div>
+
+        <!-- ALERTA REEMBOLSO PENDENTE — igual ao gerente + botão solicitação de prioridade -->
+        <div class="reemb-auto-alert" id="reembolsoAlert" style="display:none;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <div>
+              <div style="font-size:15px;font-weight:600;color:var(--red);margin-bottom:4px;">🚨 REEMBOLSO PENDENTE — PRIORIDADE MÁXIMA</div>
+              <div id="reembolsoDesc" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin:4px 0;"></div>
+              <div style="margin:8px 0;">
+                <span style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">CÓDIGO DO CLIENTE:</span><br/>
+                <span class="reemb-code" id="reembCodigo">—</span>
+              </div>
+              <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">⚠️ Comprovante impresso automaticamente. Cliente enviará o código via WhatsApp.</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+              <button class="btn-action btn-green" style="padding:12px 20px;font-size:16px;" onclick="confirmarReembolso()">✅ CÓDIGO CONFERE — PAGAR</button>
+              <button class="btn-action btn-red" style="padding:8px 16px;font-size:13px;opacity:.7;" onclick="rejeitarReembolso()">❌ CÓDIGO NÃO CONFERE</button>
+              <button class="btn-action" style="padding:8px 16px;font-size:12px;background:rgba(61,156,240,0.2);border:1px solid var(--blue);color:var(--blue);" onclick="solicitarPrioridade()">📩 SOLICITAR PRIORIDADE AO GERENTE</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerta estoque baixo cigarros -->
+        <div id="alertCigBanner" style="display:none;background:rgba(240,122,32,0.08);border:1px solid rgba(240,122,32,0.4);padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--orange);">🚬 ESTOQUE BAIXO DE CIGARROS</div>
+            <div id="alertCigDesc" style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;"></div>
+          </div>
+          <button class="btn-action" style="background:var(--orange);color:#000;" onclick="goPage('estoque',null)">VER ESTOQUE</button>
+        </div>
+
+        <!-- KPIs — sem vendas e sem crédito -->
+        <div class="grid grid-2" style="margin-bottom:16px;max-width:500px;">
+          <div class="card"><div class="card-title">Heineken Hoje</div><div class="stat-value color-blue" id="k-litH">—</div><div class="stat-label">Litros servidos</div></div>
+          <div class="card"><div class="card-title">Brahma Hoje</div><div class="stat-value color-orange" id="k-litB">—</div><div class="stat-label">Litros servidos</div></div>
+        </div>
+
+        <!-- Cards Temperatura Serpentina -->
+        <div class="grid grid-2" style="margin-bottom:16px;">
+          <div class="card" id="cardTempH" style="border-left:3px solid #18e070;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:0;right:0;bottom:0;width:4px;background:linear-gradient(to bottom,#34bfff,#18e070,#d4a020,#f83030);opacity:.4;"></div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <span style="font-size:20px;">🌡️</span>
+              <div>
+                <div class="card-title" style="margin:0;color:#00c878;">Heineken — Serpentina</div>
+                <div style="font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">Temperatura em tempo real</div>
+              </div>
+              <span id="tempHBadge" class="badge badge-green" style="margin-left:auto;font-size:10px;">—</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:8px;">
+              <span id="tempH" style="font-family:'Bebas Neue',sans-serif;font-size:48px;line-height:1;color:#18e070;">—</span>
+              <span style="font-size:14px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">°C</span>
+            </div>
+            <div id="tempHStatus" style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:4px;">Aguardando leitura…</div>
+            <div style="margin-top:10px;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;">
+              <div id="tempHBar" style="height:4px;border-radius:2px;background:#18e070;width:40%;transition:width .5s,background .5s;"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:3px;">
+              <span>0°C</span><span style="color:#34bfff;">2°C</span><span style="color:#18e070;">6°C</span><span style="color:#d4a020;">8°C</span><span style="color:#f83030;">10°C+</span>
+            </div>
+            <div id="tempHLastUpdate" style="font-size:9px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:6px;text-align:right;"></div>
+            <!-- Status compressor (somente leitura para operador) -->
+            <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:1px;">⚡ COMPRESSOR</span>
+              <span id="compStatusOp" style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:#18e070;">—</span>
+            </div>
+          </div>
+          <div class="card" id="cardTempB" style="border-left:3px solid #d4a020;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:0;right:0;bottom:0;width:4px;background:linear-gradient(to bottom,#34bfff,#18e070,#d4a020,#f83030);opacity:.4;"></div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <span style="font-size:20px;">🌡️</span>
+              <div>
+                <div class="card-title" style="margin:0;color:#d4a020;">Brahma — Serpentina</div>
+                <div style="font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">Temperatura em tempo real</div>
+              </div>
+              <span id="tempBBadge" class="badge badge-green" style="margin-left:auto;font-size:10px;">—</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:8px;">
+              <span id="tempB" style="font-family:'Bebas Neue',sans-serif;font-size:48px;line-height:1;color:#18e070;">—</span>
+              <span style="font-size:14px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">°C</span>
+            </div>
+            <div id="tempBStatus" style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:4px;">Aguardando leitura…</div>
+            <div style="margin-top:10px;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;">
+              <div id="tempBBar" style="height:4px;border-radius:2px;background:#18e070;width:40%;transition:width .5s,background .5s;"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:3px;">
+              <span>0°C</span><span style="color:#34bfff;">2°C</span><span style="color:#18e070;">6°C</span><span style="color:#d4a020;">8°C</span><span style="color:#f83030;">10°C+</span>
+            </div>
+            <div id="tempBLastUpdate" style="font-size:9px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:6px;text-align:right;"></div>
+            <!-- Histórico -->
+            <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+              <div style="font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:6px;letter-spacing:1px;">📈 ÚLTIMAS LEITURAS</div>
+              <div id="tempHistorico" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);max-height:80px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-3" style="margin-bottom:16px;">
+          <!-- ESTOQUE -->
+          <div class="card" style="grid-column:span 2;">
+            <div class="card-header"><div class="card-title">Estoque Tempo Real</div></div>
+            <div class="stock-item">
+              <div class="stock-header"><span>🍺 Varejo</span><span id="sv-v" style="font-family:'IBM Plex Mono',monospace;">—</span></div>
+              <div class="stock-bar-bg"><div class="stock-bar" id="bar-v" style="background:var(--gold);width:100%;"></div></div>
+            </div>
+            <div class="stock-item">
+              <div class="stock-header"><span>🍺 Maço</span><span id="sv-m" style="font-family:'IBM Plex Mono',monospace;">—</span></div>
+              <div class="stock-bar-bg"><div class="stock-bar" id="bar-m" style="background:var(--blue);width:100%;"></div></div>
+            </div>
+            <div class="stock-item">
+              <div class="stock-header"><span>🚬 Cigarros Varejo</span><span id="sv-cv" style="font-family:'IBM Plex Mono',monospace;">—</span></div>
+              <div class="stock-bar-bg"><div class="stock-bar" id="bar-cv" style="background:var(--orange);width:100%;"></div></div>
+            </div>
+            <div class="stock-item">
+              <div class="stock-header"><span>🚬 Cigarros Maço</span><span id="sv-cm" style="font-family:'IBM Plex Mono',monospace;">—</span></div>
+              <div class="stock-bar-bg"><div class="stock-bar" id="bar-cm" style="background:var(--orange);width:100%;"></div></div>
+            </div>
+          </div>
+
+          <!-- STATUS MÁQUINA -->
+          <div class="card">
+            <div class="card-header"><div class="card-title">Status Máquina</div></div>
+            <div class="wifi-widget">
+              <span style="font-size:18px;">📶</span>
+              <div class="wifi-info">
+                <div class="wifi-ssid" id="wifiSSID">—</div>
+                <div class="wifi-ip" id="wifiIPDisp">—</div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:8px;"><span style="color:var(--muted);">Bloqueio</span><span id="sBloq" class="badge badge-green">LIVRE</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:8px;"><span style="color:var(--muted);">Estado</span><span id="maqEstado" style="font-family:'IBM Plex Mono',monospace;font-size:11px;">—</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:8px;"><span style="color:var(--muted);">Reembolsos</span><span id="sReemb" style="font-family:'IBM Plex Mono',monospace;font-size:11px;">—</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;"><span style="color:var(--muted);">Uptime</span><span id="sUptime" style="font-family:'IBM Plex Mono',monospace;font-size:11px;">—</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════ ALERTAS ═══════════════════════════════ -->
+      <div id="page-alertas" class="page">
+        <div class="page-header"><div class="page-title">ALERTAS</div></div>
+        <div class="card" id="alertasList">
+          <div style="text-align:center;padding:40px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">Nenhum alerta ativo.</div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════ ESTOQUE ═══════════════════════════════ -->
+      <div id="page-estoque" class="page">
+        <div class="page-header">
+          <div class="page-title">ESTOQUE</div>
+          <div class="badge badge-blue">VISUALIZAÇÃO</div>
+        </div>
+
+        <div style="background:rgba(61,156,240,0.06);border:1px solid rgba(61,156,240,0.3);padding:12px 16px;margin-bottom:20px;font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--muted);">
+          ℹ️ Aqui você visualiza o estoque em tempo real. Para ajustar quantidades ou calibrar válvulas, solicite ao gerente.
+        </div>
+
+        <div class="grid grid-2" style="margin-bottom:16px;">
+          <!-- CHOPP -->
+          <div class="card">
+            <div class="card-header"><div class="card-title">🍺 CHOPP — BARRIS</div></div>
+            <div class="stock-item">
+              <div class="stock-header">
+                <span>Varejo (garrafinhas)</span>
+                <span id="eVarejoNum" style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);">—</span>
+              </div>
+              <div class="stock-bar-bg" style="height:10px;"><div class="stock-bar" id="bar-v2" style="background:var(--gold);width:100%;"></div></div>
+              <div id="eVarejoAlert" style="display:none;font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--orange);margin-top:6px;">⚠️ Estoque baixo — avise o gerente!</div>
+            </div>
+            <div class="stock-item">
+              <div class="stock-header">
+                <span>Maço (litros)</span>
+                <span id="eMacoNum" style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--blue);">—</span>
+              </div>
+              <div class="stock-bar-bg" style="height:10px;"><div class="stock-bar" id="bar-m2" style="background:var(--blue);width:100%;"></div></div>
+              <div id="eMacoAlert" style="display:none;font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--orange);margin-top:6px;">⚠️ Estoque baixo — avise o gerente!</div>
+            </div>
+          </div>
+
+          <!-- CIGARROS -->
+          <div class="card">
+            <div class="card-header"><div class="card-title">🚬 CIGARROS</div></div>
+            <div class="stock-item">
+              <div class="stock-header">
+                <span>Varejo (unidades)</span>
+                <span id="eCigVarNum" style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--orange);">—</span>
+              </div>
+              <div class="stock-bar-bg" style="height:10px;"><div class="stock-bar" id="bar-cv2" style="background:var(--orange);width:100%;"></div></div>
+            </div>
+            <div class="stock-item">
+              <div class="stock-header">
+                <span>Maço</span>
+                <span id="eCigMacNum" style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--orange);">—</span>
+              </div>
+              <div class="stock-bar-bg" style="height:10px;"><div class="stock-bar" id="bar-cm2" style="background:var(--orange);width:100%;"></div></div>
+            </div>
+            <div class="restricted-notice" style="margin-top:12px;padding:10px 12px;">
+              Para atualizar o estoque de cigarros, avise o gerente via WhatsApp ou aguarde visita.
+            </div>
+          </div>
+        </div>
+
+        <!-- STATUS GERAL -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">📊 STATUS GERAL DA MÁQUINA</div></div>
+          <div class="grid grid-3">
+            <div><div style="font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:4px;">BLOQUEIO</div><div id="est-bloq" class="badge badge-green">LIVRE</div></div>
+            <div><div style="font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:4px;">ESTADO</div><div id="est-estado" style="font-family:'IBM Plex Mono',monospace;font-size:12px;">—</div></div>
+            <div><div style="font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:4px;">UPTIME</div><div id="est-uptime" style="font-family:'IBM Plex Mono',monospace;font-size:12px;">—</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════ REEMBOLSO ═══════════════════════════════ -->
+      <div id="page-reembolso" class="page">
+        <div class="page-header">
+          <div class="page-title">REEMBOLSO</div>
+          <div class="badge badge-blue">OPERADOR</div>
+        </div>
+
+        <!-- Status atual — idêntico ao alerta do gerente -->
+        <div class="reemb-auto-alert" id="reembPendente" style="display:none;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <div>
+              <div style="font-size:15px;font-weight:600;color:var(--red);margin-bottom:4px;">🚨 REEMBOLSO PENDENTE — PRIORIDADE MÁXIMA</div>
+              <div id="reembDesc" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin:4px 0;"></div>
+              <div style="margin:8px 0;">
+                <span style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">CÓDIGO DO CLIENTE:</span><br/>
+                <span class="reemb-code" id="reembCodigoPage">—</span>
+              </div>
+              <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">⚠️ Comprovante impresso automaticamente. Cliente enviará o código via WhatsApp.</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+              <button class="btn-action btn-green" style="padding:12px 20px;font-size:16px;" onclick="confirmarReembolso()">✅ CÓDIGO CONFERE — PAGAR</button>
+              <button class="btn-action btn-red" style="padding:8px 16px;font-size:13px;opacity:.7;" onclick="rejeitarReembolso()">❌ CÓDIGO NÃO CONFERE</button>
+              <button class="btn-action" style="padding:8px 16px;font-size:12px;background:rgba(61,156,240,0.2);border:1px solid var(--blue);color:var(--blue);" onclick="solicitarPrioridade()">📩 SOLICITAR PRIORIDADE AO GERENTE</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Solicitar reembolso manualmente (quando cliente pede pessoalmente) -->
+        <div class="card" style="margin-bottom:16px;border-color:rgba(212,160,23,0.3);">
+          <div class="card-header">
+            <div class="card-title">📩 ABRIR SOLICITAÇÃO DE REEMBOLSO</div>
+            <span style="font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">Cliente pediu reembolso presencialmente?</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:16px;">Use este formulário para registrar a solicitação e notificar o gerente. A autorização final é do gerente.</div>
+          <div class="grid grid-2" style="gap:12px;margin-bottom:12px;">
+            <div>
+              <label style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-family:'IBM Plex Mono',monospace;display:block;margin-bottom:6px;">Valor solicitado (R$) *</label>
+              <input type="number" id="solValor" class="cmd-input" placeholder="Ex: 5.00" step="0.50" min="0.50" style="width:100%;font-size:16px;padding:10px;" />
+            </div>
+            <div>
+              <label style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-family:'IBM Plex Mono',monospace;display:block;margin-bottom:6px;">Método de pagamento</label>
+              <select id="solMetodo" class="cmd-select" style="width:100%;font-size:13px;padding:10px;">
+                <option value="PIX">PIX</option>
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Cartão">Cartão</option>
+                <option value="RFID">Cartão President (RFID)</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-family:'IBM Plex Mono',monospace;display:block;margin-bottom:6px;">Motivo / Observação</label>
+            <input type="text" id="solMotivo" class="cmd-input" placeholder="Ex: Máquina não serviu após pagamento" style="width:100%;font-size:13px;" />
+          </div>
+          <button onclick="abrirSolicitacao()" style="background:var(--gold);color:#000;border:none;padding:12px 24px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;transition:opacity .2s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+            📩 ENVIAR SOLICITAÇÃO AO GERENTE
+          </button>
+          <div id="solMsg" style="font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:8px;"></div>
+        </div>
+
+        <div id="reembSemPendente" class="card" style="text-align:center;padding:48px;">
+          <div style="font-size:32px;margin-bottom:12px;">✅</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--green);">NENHUM REEMBOLSO AUTOMÁTICO PENDENTE</div>
+          <div style="font-size:12px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:8px;">Quando a máquina registrar um reembolso, o alerta aparecerá aqui automaticamente.</div>
+        </div>
+
+        <!-- HISTÓRICO DE REEMBOLSOS -->
+        <div class="card" style="margin-top:16px;">
+          <div class="card-header">
+            <div class="card-title">📋 HISTÓRICO DE REEMBOLSOS — HOJE</div>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Horário</th>
+                <th>Tipo</th>
+                <th>Método</th>
+                <th>Valor</th>
+                <th>Código</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="reembHistBody">
+              <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted);">Nenhum reembolso registrado hoje</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════ CARTÃO PRESIDENT ═══════════════════════════════ -->
+      <div id="page-cartao" class="page">
+        <div class="page-header">
+          <div class="page-title">💳 CARTÃO PRESIDENT</div>
+          <div class="badge badge-gold">CADASTRO &amp; RECARGA</div>
+        </div>
+
+        <!-- CADASTRAR NOVO CLIENTE -->
+        <div class="grid grid-2" style="margin-bottom:16px;">
+          <div class="card" style="border-color:rgba(212,160,23,0.3);">
+            <div class="card-header">
+              <div class="card-title">➕ CADASTRAR NOVO CLIENTE</div>
+            </div>
+
+            <div class="form-field">
+              <label>Nome Completo *</label>
+              <input type="text" id="cartaoNome" placeholder="Ex: João da Silva" />
+            </div>
+            <div class="form-field">
+              <label>CPF *</label>
+              <input type="text" id="cartaoCpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)" />
+            </div>
+            <div class="form-field">
+              <label>Data de Nascimento * <span style="color:var(--red);font-size:9px;">(verificação de maioridade)</span></label>
+              <input type="date" id="cartaoDataNasc" />
+            </div>
+            <div class="form-field">
+              <label>UID do Cartão RFID</label>
+              <div style="display:flex;gap:8px;">
+                <input type="text" id="cartaoUID" placeholder="Ex: A1B2C3D4" style="flex:1;letter-spacing:3px;text-transform:uppercase;" oninput="this.value=this.value.toUpperCase().replace(/[^A-F0-9]/g,'')" />
+                <button onclick="lerCartaoRFID()" style="background:var(--gold);color:#000;border:none;padding:10px 14px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;white-space:nowrap;">📡 LER</button>
+              </div>
+              <div style="font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:4px;">Clique em LER ou digite manualmente.</div>
+            </div>
+            <div class="form-field">
+              <label>🔐 PIN do Cartão (4 dígitos) *</label>
+              <input type="password" id="cartaoPin" maxlength="4" inputmode="numeric" placeholder="••••"
+                style="font-size:28px;letter-spacing:10px;text-align:center;" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)"/>
+              <div style="font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:4px;">Informe ao cliente após cadastro.</div>
+            </div>
+            <div class="form-field">
+              <label>Saldo Inicial (R$)</label>
+              <input type="number" id="cartaoSaldoInicial" placeholder="0.00" step="0.50" min="0" value="0" />
+            </div>
+            <button onclick="cadastrarCliente()" style="width:100%;padding:14px;background:var(--gold);color:#000;border:none;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;cursor:pointer;transition:opacity .2s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+              ✅ CADASTRAR CLIENTE
+            </button>
+            <div id="cartaoCadMsg" style="font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:8px;"></div>
+          </div>
+
+          <!-- RECARREGAR SALDO -->
+          <div class="card" style="border-color:rgba(45,186,110,0.3);">
+            <div class="card-header">
+              <div class="card-title">💰 RECARREGAR SALDO</div>
+            </div>
+            <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:16px;">Cliente enviou o Pix? Selecione e adicione o saldo.</div>
+
+            <div class="form-field">
+              <label>Selecionar Cliente</label>
+              <div style="display:flex;gap:8px;">
+                <select id="recargaSelect" class="cmd-select" style="flex:1;font-size:13px;" onchange="selecionarClienteRecarga()">
+                  <option value="">— Selecionar —</option>
+                </select>
+                <button onclick="lerCartaoRFIDRecarga()" style="background:var(--blue);color:#000;border:none;padding:10px 12px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;cursor:pointer;white-space:nowrap;">📡 LER</button>
+              </div>
+            </div>
+
+            <div id="recargaClienteInfo" style="display:none;background:rgba(45,186,110,0.06);border:1px solid rgba(45,186,110,0.3);padding:12px;margin-bottom:14px;">
+              <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">CLIENTE SELECIONADO</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--green);" id="recargaNomeCliente">—</div>
+              <div style="font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--muted);">Saldo atual: <span id="recargaSaldoAtual" style="color:var(--gold);">R$ 0,00</span></div>
+            </div>
+
+            <div class="form-field">
+              <label>Valor da Recarga (R$)</label>
+              <input type="number" id="recargaValor" placeholder="Ex: 10.00" step="0.50" min="0.50" style="font-size:18px;padding:12px;" />
+              <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+                <button onclick="setRecarga(5)"  style="flex:1;padding:10px;background:rgba(45,186,110,0.1);border:1px solid rgba(45,186,110,0.3);color:var(--green);cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:16px;">R$5</button>
+                <button onclick="setRecarga(10)" style="flex:1;padding:10px;background:rgba(45,186,110,0.1);border:1px solid rgba(45,186,110,0.3);color:var(--green);cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:16px;">R$10</button>
+                <button onclick="setRecarga(20)" style="flex:1;padding:10px;background:rgba(45,186,110,0.1);border:1px solid rgba(45,186,110,0.3);color:var(--green);cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:16px;">R$20</button>
+                <button onclick="setRecarga(50)" style="flex:1;padding:10px;background:rgba(45,186,110,0.1);border:1px solid rgba(45,186,110,0.3);color:var(--green);cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:16px;">R$50</button>
+              </div>
+            </div>
+
+            <button onclick="efetuarRecarga()" style="width:100%;padding:14px;background:var(--green);color:#000;border:none;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;cursor:pointer;transition:opacity .2s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+              ➕ ADICIONAR SALDO
+            </button>
+            <div id="recargaMsg" style="font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:8px;"></div>
+          </div>
+        </div>
+
+        <!-- LISTA CLIENTES -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">👥 CLIENTES CADASTRADOS <span id="cartaoCount" style="color:var(--gold);">0</span></div>
+            <input type="text" id="cartaoBusca" class="cmd-input" placeholder="Buscar cliente..." style="width:200px;font-size:12px;" oninput="filtrarClientes()" />
+          </div>
+          <table class="table">
+            <thead>
+              <tr><th>Nº</th><th>Nome</th><th>UID Cartão</th><th>Saldo</th><th>PIN</th><th>Status</th><th>Cadastro</th><th>Ações</th></tr>
+            </thead>
+            <tbody id="tbodyCartao"></tbody>
+          </table>
+          <div id="cartaoVazio" style="text-align:center;padding:32px;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px;">Nenhum cliente cadastrado ainda.</div>
+        </div>
+      </div>
+
+
+      <!-- ══ CÂMERA ══ -->
+      <div id="page-camera" class="page" style="display:none;">
+        <div class="page-header">
+          <div class="page-title">📷 CÂMERA AO VIVO</div>
+          <span id="camStatusBadge" style="background:var(--red);color:#fff;font-size:10px;padding:3px 10px;font-family:'IBM Plex Mono',monospace;letter-spacing:2px;">OFFLINE</span>
+        </div>
+        <div class="grid grid-2" style="margin-bottom:16px;">
+          <div class="card" style="border-color:rgba(61,156,240,0.3);">
+            <div class="card-header"><div class="card-title">⚙️ CONFIGURAÇÃO</div></div>
+            <div class="form-field">
+              <label>IP da Câmera</label>
+              <input type="text" id="camIP" placeholder="192.168.1.100"/>
+            </div>
+            <div class="form-field">
+              <label>Porta</label>
+              <input type="text" id="camPorta" placeholder="80" value="80"/>
+            </div>
+            <div class="form-field">
+              <label>Usuário</label>
+              <input type="text" id="camUser" placeholder="admin" value="admin"/>
+            </div>
+            <div class="form-field">
+              <label>Senha</label>
+              <input type="password" id="camSenha" placeholder="••••••••"/>
+            </div>
+            <div class="form-field">
+              <label>Path do Stream</label>
+              <input type="text" id="camPath" placeholder="/videostream.cgi" value="/videostream.cgi"/>
+              <div style="font-size:9px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:4px;">Comum: /stream &nbsp;/video &nbsp;/mjpg/video.mjpg</div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button onclick="conectarCamera()" style="flex:1;padding:12px;background:var(--green);color:#000;border:none;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;">▶ CONECTAR</button>
+              <button onclick="desconectarCamera()" style="flex:1;padding:12px;background:var(--red);color:#fff;border:none;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;">■ PARAR</button>
+            </div>
+          </div>
+          <div class="card" style="border-color:rgba(45,186,110,0.3);">
+            <div class="card-header">
+              <div class="card-title">📡 STREAM AO VIVO</div>
+              <div id="camFps" style="font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;"></div>
+            </div>
+            <div id="camContainer" style="position:relative;background:#000;min-height:240px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);overflow:hidden;">
+              <div id="camOffline" style="text-align:center;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:11px;">
+                <div style="font-size:36px;margin-bottom:8px;">📷</div>Configure e clique em CONECTAR
+              </div>
+              <img id="camStream" style="display:none;width:100%;height:auto;max-height:320px;object-fit:contain;" alt="stream" onload="camFrameOk()" onerror="camFrameErr()"/>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:10px;">
+              <button onclick="tirarSnapshot()" style="flex:1;padding:10px;background:rgba(212,160,23,0.15);border:1px solid rgba(212,160,23,0.3);color:var(--gold);font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;">📸 SNAPSHOT</button>
+              <button onclick="toggleFullscreen()" style="padding:10px 14px;background:rgba(61,156,240,0.15);border:1px solid rgba(61,156,240,0.3);color:var(--blue);font-family:'Bebas Neue',sans-serif;font-size:14px;cursor:pointer;" title="Tela cheia">⛶</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🖼️ SNAPSHOTS</div>
+            <button onclick="limparSnapshots()" style="background:rgba(232,64,64,0.15);border:1px solid rgba(232,64,64,0.3);color:var(--red);padding:4px 10px;cursor:pointer;font-size:10px;font-family:'IBM Plex Mono',monospace;">🗑 LIMPAR</button>
+          </div>
+          <div id="snapshotGrid" style="display:flex;flex-wrap:wrap;gap:8px;padding:8px;min-height:60px;">
+            <div style="color:var(--muted);font-size:11px;font-family:'IBM Plex Mono',monospace;width:100%;text-align:center;padding:20px 0;">Nenhum snapshot ainda.</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /layout -->
+</div><!-- /app -->
+
+<script>
+// ================================================================
+// CONFIGURAÇÃO — USUÁRIOS OPERADORES
+// Gerente pode adicionar/alterar senhas no painel principal
+// ================================================================
+const OPERADORES = {
+  'operador': 'op1234',
+  'Operador': 'op1234'
+};
+// Senha do operador gerenciada pelo gerente no painel principal
+// O gerente salva em localStorage com a chave 'presidentOpSenha'
+(function(){
+  const s = localStorage.getItem('presidentOpSenha');
+  if(s){ OPERADORES['operador'] = s; OPERADORES['Operador'] = s; }
+})();
+
+let espIP = '';
+let lastData = null;
+let autoInterval = null;
+let demoMode = true;
+let operadorLogado = '';
+let reembPendente = null;
+
+// ================================================================
+// LOGIN / LOGOUT
+// ================================================================
+function doLogin(){
+  const u = document.getElementById('inputUser').value.trim();
+  const p = document.getElementById('inputPass').value;
+  const ip = document.getElementById('inputIP').value.trim();
+
+  if (!OPERADORES[u] || OPERADORES[u] !== p) {
+    document.getElementById('loginError').style.display = 'block';
+    return;
+  }
+
+  operadorLogado = u;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('sidebarUserName').textContent = u.toUpperCase();
+
+  const savedIP = localStorage.getItem('presidentESPIP');
+  if (ip) {
+    espIP = ip;
+    localStorage.setItem('presidentESPIP', ip);
+  } else if (savedIP) {
+    espIP = savedIP;
+  }
+  document.getElementById('espIPInput').value = espIP;
+  init();
+}
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'Enter' && document.getElementById('loginScreen').style.display !== 'none'){
+    doLogin();
+  }
+});
+
+(function(){
+  const saved = localStorage.getItem('presidentESPIP');
+  if(saved) document.getElementById('inputIP').value = saved;
+})();
+
+function doLogout(){
+  if(autoInterval) clearInterval(autoInterval);
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('inputPass').value = '';
+}
+
+// ================================================================
+// INIT
+// ================================================================
+function init(){
+  updateClock();
+  setInterval(updateClock, 1000);
+  autoInterval = setInterval(fetchStatus, 8000);
+  fetchStatus();
+  carregarCartoes();
+  renderTbodyCartao();
+}
+
+function updateClock(){
+  const now = new Date();
+  const p2 = n => String(n).padStart(2,'0');
+  document.getElementById('clock').textContent =
+    p2(now.getHours())+':'+p2(now.getMinutes())+':'+p2(now.getSeconds());
+}
+
+function updateIP(){
+  espIP = document.getElementById('espIPInput').value.trim();
+  if(espIP) localStorage.setItem('presidentESPIP', espIP);
+}
+
+// ================================================================
+// NAVEGAÇÃO
+// ================================================================
+function goPage(page, el){
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const target = document.getElementById('page-'+page);
+  if(target) target.classList.add('active');
+  if(el) el.classList.add('active');
+  // auto-highlight nav sem elemento
+  if(!el){
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if(n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+page+"'")){
+        n.classList.add('active');
+      }
+    });
+  }
+}
+
+// ================================================================
+// API — FETCH STATUS
+// ================================================================
+const WEB_USER = 'Evanildo';
+const WEB_PASS_KEY = 'presidentSenha';
+function getWebPass(){
+  return localStorage.getItem(WEB_PASS_KEY) || 'Evanildo@2';
+}
+
+async function fetchStatus(){
+  if(!espIP){ setDemo(); return; }
+  try {
+    const r = await fetch(`http://${espIP}/api/status`, {
+      headers: { 'Authorization': 'Basic ' + btoa(WEB_USER+':'+getWebPass()) },
+      signal: AbortSignal.timeout(4000)
+    });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d = await r.json();
+    lastData = d;
+    demoMode = false;
+    setConnectionStatus('online');
+    renderFromData(d);
+  } catch(e){
+    setConnectionStatus('offline', e.message);
+    if(!lastData) setDemo();
+  }
+}
+
+function setConnectionStatus(state, msg){
+  const el = document.getElementById('connectionStatus');
+  if(state === 'online'){
+    el.className = 'online'; el.textContent = '● ONLINE';
+    const dot = document.getElementById('dotMachine');
+    if(dot){ dot.className='dot'; }
+    document.getElementById('lastSync').textContent = 'Sync: '+new Date().toLocaleTimeString('pt-BR');
+  } else if(state === 'offline'){
+    el.className = 'offline'; el.textContent = '● OFFLINE';
+    const dot = document.getElementById('dotMachine');
+    if(dot){ dot.className='dot red'; }
+  } else {
+    el.className = 'demo'; el.textContent = '● DEMO';
+  }
+}
+
+function setDemo(){
+  setConnectionStatus('demo');
+  demoMode = true;
+}
+
+function setText(id, val){
+  const el = document.getElementById(id);
+  if(el) el.textContent = val;
+}
+
+function setBar(id, pct){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const p = Math.max(0, Math.min(100, pct));
+  el.style.width = p+'%';
+  el.style.background = p < 20 ? 'var(--red)' : p < 40 ? 'var(--orange)' : 'var(--green)';
+}
+
+function fmtR(v){ return 'R$ '+(v||0).toFixed(2).replace('.',','); }
+function fmtL(v){ return (parseFloat(v)||0).toFixed(1).replace('.',',')+'L'; }
+function p2(n){ return String(n).padStart(2,'0'); }
+
+function renderFromData(d){
+  // Litros — operador vê produção mas não vendas em R$ nem crédito
+  setText('k-litH', fmtL(d.litrosHDia||d.litrosH));
+  setText('k-litB', fmtL(d.litrosBDia||d.litrosB));
+
+  // Estoque dashboard
+  const eVMax=40, eMMax=10;
+  const pV = Math.round((d.estoqueVarejo||0)/eVMax*100);
+  const pM = Math.round((d.estoqueMaco||0)/eMMax*100);
+  setText('sv-v', (d.estoqueVarejo||0)+'/'+eVMax);
+  setText('sv-m', (d.estoqueMaco||0)+'/'+eMMax);
+  setBar('bar-v', pV); setBar('bar-m', pM);
+
+  // Estoque page
+  setText('eVarejoNum', String(d.estoqueVarejo||0));
+  setText('eMacoNum', String(d.estoqueMaco||0));
+  setBar('bar-v2', pV); setBar('bar-m2', pM);
+  const eVAlert = document.getElementById('eVarejoAlert');
+  const eMAlert = document.getElementById('eMacoAlert');
+  if(eVAlert) eVAlert.style.display = pV < 20 ? 'block' : 'none';
+  if(eMAlert) eMAlert.style.display = pM < 20 ? 'block' : 'none';
+
+  // Cigarros — mock local
+  const cigVar = parseInt(localStorage.getItem('cigVarejo')||'40');
+  const cigMac = parseInt(localStorage.getItem('cigMaco')||'5');
+  const pCV = Math.round(cigVar/40*100);
+  const pCM = Math.round(cigMac/10*100);
+  setText('sv-cv', cigVar+'/40');
+  setText('sv-cm', cigMac+'/10');
+  setText('eCigVarNum', String(cigVar));
+  setText('eCigMacNum', String(cigMac));
+  setBar('bar-cv', pCV); setBar('bar-cm', pCM);
+  setBar('bar-cv2', pCV); setBar('bar-cm2', pCM);
+
+  // Alerta cigarro
+  const alertCig = document.getElementById('alertCigBanner');
+  if(alertCig){
+    if(cigVar < 10 || cigMac < 2){
+      alertCig.style.display = 'flex';
+      document.getElementById('alertCigDesc').textContent =
+        `Varejo: ${cigVar} un. | Maço: ${cigMac} un. — Repor com urgência!`;
+    } else {
+      alertCig.style.display = 'none';
+    }
+  }
+
+  // Status máquina
+  const bloq = d.bloqueada;
+  setText('wifiSSID', 'WiFi Conectado');
+  setText('wifiIPDisp', d.wifiIP || espIP);
+  setText('wifiLabel', d.wifiIP || espIP);
+  setText('maqEstado', d.estado || '—');
+  setText('est-estado', d.estado || '—');
+  setText('sBloq', bloq ? 'BLOQUEADA' : 'LIVRE');
+  const sBloqEl = document.getElementById('sBloq');
+  if(sBloqEl) sBloqEl.className = 'badge '+(bloq ? 'badge-red' : 'badge-green');
+  const estBloqEl = document.getElementById('est-bloq');
+  if(estBloqEl){ estBloqEl.textContent = bloq ? 'BLOQUEADA' : 'LIVRE'; estBloqEl.className = 'badge '+(bloq ? 'badge-red' : 'badge-green'); }
+  setText('sReemb', (d.reembolsos||0)+'x');
+  const up = d.uptime || 0;
+  const uptimeStr = p2(Math.floor(up/3600))+':'+p2(Math.floor((up%3600)/60))+':'+p2(up%60);
+  setText('sUptime', uptimeStr);
+  setText('est-uptime', uptimeStr);
+
+  // Alertas nav badge
+  const alertas = [];
+  if(bloq) alertas.push({icon:'🔒',title:'Máquina Bloqueada',time:'Agora'});
+  if(d.semCopos) alertas.push({icon:'🥤',title:'SEM COPOS — Repor imediatamente!',time:'Agora'});
+  if(pV < 20) alertas.push({icon:'⚠️',title:'Estoque Varejo baixo ('+d.estoqueVarejo+')',time:'Agora'});
+  if(pM < 20) alertas.push({icon:'⚠️',title:'Estoque Maço baixo ('+d.estoqueMaco+')',time:'Agora'});
+  if(cigVar < 10) alertas.push({icon:'🚬',title:'Cigarros varejo baixo ('+cigVar+')',time:'Agora'});
+
+  const ab = document.getElementById('alertBadge');
+  if(ab){ ab.textContent = String(alertas.length); ab.style.display = alertas.length>0?'inline':'none'; }
+
+  const alertasList = document.getElementById('alertasList');
+  if(alertasList){
+    if(alertas.length === 0){
+      alertasList.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-family:\'IBM Plex Mono\',monospace;">✅ Nenhum alerta ativo.</div>';
+    } else {
+      alertasList.innerHTML = alertas.map(a => `
+        <div class="alert-item">
+          <div class="alert-icon">${a.icon}</div>
+          <div class="alert-body">
+            <div class="alert-title">${a.title}</div>
+            <div class="alert-time">${a.time}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  // REEMBOLSO PENDENTE
+  const ra = document.getElementById('reembolsoAlert');
+  const rp = document.getElementById('reembPendente');
+  const rs = document.getElementById('reembSemPendente');
+  const rb = document.getElementById('reembBadge');
+
+  if(d.reembPendente === true){
+    const valorFmt = fmtR(parseFloat(d.reembValor||0));
+    const codigo = d.reembCodigo || '';
+    reembPendente = { valor: parseFloat(d.reembValor||0), codigo, metodo: d.mpMetodoPgto||'—' };
+
+    // Dashboard alert
+    if(ra) ra.style.display = 'flex';
+    setText('reembolsoDesc', valorFmt + ' — ' + (d.mpMetodoPgto||'—'));
+    setText('reembCodigo', codigo);
+
+    // Reembolso page
+    if(rp){ rp.style.display='block'; }
+    if(rs){ rs.style.display='none'; }
+    setText('reembValorGrande', valorFmt);
+    setText('reembCodigoPage', codigo);
+    setText('reembDesc', valorFmt + ' via ' + (d.mpMetodoPgto||'—'));
+
+    if(rb){ rb.style.display='inline'; }
+  } else {
+    if(ra) ra.style.display='none';
+    if(rp) rp.style.display='none';
+    if(rs) rs.style.display='block';
+    if(rb) rb.style.display='none';
+    reembPendente = null;
+  }
+
+  // ── Temperatura serpentinas via HTTP polling ─────────────────
+  const tHp = parseFloat(d.tempH ?? d.tH ?? NaN);
+  const tBp = parseFloat(d.tempB ?? d.tB ?? NaN);
+  if (!isNaN(tHp) && !isNaN(tBp)) {
+    atualizarTemp(tHp, tBp);
+  }
+}
+
+// ================================================================
+// TEMPERATURA — atualiza cards Heineken e Brahma
+// ================================================================
+function atualizarTemp(tH, tB) {
+  function corTemp(t) {
+    if (t < 2)  return '#34bfff';
+    if (t <= 6) return '#18e070';
+    if (t <= 8) return '#d4a020';
+    return '#f83030';
+  }
+  function statusTemp(t) {
+    if (t < 2)  return '🔵 Muito frio';
+    if (t <= 6) return '✅ Ideal';
+    if (t <= 8) return '⚠️ Alerta';
+    if (t <= 10)return '🟠 Alto';
+    return '🔴 EMERGÊNCIA';
+  }
+  function badgeClass(t) {
+    if (t < 2)  return 'badge-blue';
+    if (t <= 6) return 'badge-green';
+    if (t <= 8) return 'badge-gold';
+    return 'badge-red';
+  }
+  function barPct(t) { return Math.min(100, Math.max(0, (t / 12) * 100)); }
+  const now = new Date().toLocaleTimeString('pt-BR');
+
+  ['H','B'].forEach(k => {
+    const t = k === 'H' ? tH : tB;
+    const el  = document.getElementById('temp'+k);
+    const els = document.getElementById('temp'+k+'Status');
+    const elb = document.getElementById('temp'+k+'Badge');
+    const elr = document.getElementById('temp'+k+'Bar');
+    const elc = document.getElementById('cardTemp'+k);
+    const elu = document.getElementById('temp'+k+'LastUpdate');
+    if(el){ el.textContent = t.toFixed(1); el.style.color = corTemp(t); }
+    if(els) els.textContent = statusTemp(t);
+    if(elb){ elb.textContent = statusTemp(t); elb.className = 'badge ' + badgeClass(t); }
+    if(elr){ elr.style.width = barPct(t)+'%'; elr.style.background = corTemp(t); }
+    if(elc) elc.style.borderLeftColor = corTemp(t);
+    if(elu) elu.textContent = '⏱ ' + now;
+  });
+
+  // Alerta emergência (temperatura > 10°C)
+  if ((tH > 10 || tB > 10) && !document.getElementById('_alertaTemp')) {
+    const a = document.createElement('div');
+    a.id = '_alertaTemp';
+    a.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#f83030;color:#fff;text-align:center;padding:10px;font-weight:700;z-index:9999;font-size:1rem;cursor:pointer;';
+    a.textContent = '🔴 TEMPERATURA ALTA — Chame o responsável imediatamente!';
+    a.onclick = () => a.remove();
+    document.body.prepend(a);
+  }
+  if (tH <= 10 && tB <= 10) { const a=document.getElementById('_alertaTemp'); if(a) a.remove(); }
+
+  // Histórico circular das últimas 10 leituras
+  if (!window._tempHistLog) window._tempHistLog = [];
+  const ts = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  window._tempHistLog.unshift({ts,tH,tB});
+  if(window._tempHistLog.length>10) window._tempHistLog.pop();
+  const elHist = document.getElementById('tempHistorico');
+  if(elHist){
+    function cor(t){return t<=6?'#18e070':t<=8?'#d4a020':'#f83030';}
+    elHist.innerHTML = window._tempHistLog.map(r=>
+      `<div style="display:flex;justify-content:space-between;gap:8px;">
+        <span style="color:var(--muted)">${r.ts}</span>
+        <span>H: <span style="color:${cor(r.tH)}">${r.tH.toFixed(1)}°C</span></span>
+        <span>B: <span style="color:${cor(r.tB)}">${r.tB.toFixed(1)}°C</span></span>
+      </div>`
+    ).join('');
+  }
+}
+
+// ================================================================
+// FIRESTORE — Listener temperatura em tempo real
+// Doc: config/temperatura  { tempH, tempB, ts }
+// ================================================================
+(function iniciarListenerTemp() {
+  // O painel operador não tem Firebase próprio — usa onSnapshot via CDN
+  const FB_CFG = {
+    apiKey: "AIzaSyCPkuzIZ3RURx9NIZ8IAd96QNBVNmPIPK4",
+    authDomain: "president24horas.firebaseapp.com",
+    projectId: "president24horas",
+    storageBucket: "president24horas.firebasestorage.app",
+    messagingSenderId: "918465727190",
+    appId: "1:918465727190:web:8364fbcd6f08c185985777"
+  };
+  // Importa Firebase dinamicamente (ESM)
+  Promise.all([
+    import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"),
+    import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js")
+  ]).then(([{initializeApp, getApps}, {getFirestore, doc, onSnapshot}]) => {
+    const fbApp = getApps().find(a => a.name === 'operador') || initializeApp(FB_CFG, 'operador');
+    const db = getFirestore(fbApp);
+    onSnapshot(doc(db, 'config', 'temperatura'), (snap) => {
+      if (!snap.exists()) return;
+      const d = snap.data();
+      const tH = parseFloat(d.tempH ?? d.tH ?? NaN);
+      const tB = parseFloat(d.tempB ?? d.tB ?? NaN);
+      if (!isNaN(tH) && !isNaN(tB)) atualizarTemp(tH, tB);
+      // Status compressor
+      const elComp = document.getElementById('compStatusOp');
+      if(elComp){
+        const on = d.comp !== false;
+        elComp.textContent = on ? '❄️ LIGADO' : '🔴 DESLIGADO';
+        elComp.style.color = on ? '#18e070' : '#f83030';
+      }
+    }, err => console.warn('Listener temp operador:', err.message));
+  }).catch(e => console.warn('Firebase operador:', e));
+})();
+
+// ================================================================
+// REEMBOLSO — CONFIRMAR / REJEITAR
+// ================================================================
+async function confirmarReembolso(){
+  if(!reembPendente){ alert('Nenhum reembolso pendente.'); return; }
+  const codigo = prompt('Digite o código do comprovante do cliente:');
+  if(!codigo) return;
+  if(codigo.trim().toUpperCase() !== reembPendente.codigo.toUpperCase()){
+    alert('❌ Código não confere! Verifique com o cliente.');
+    return;
+  }
+  // Registra localmente
+  registrarHistReembolso(reembPendente, 'Confirmado pelo operador');
+
+  if(espIP){
+    try {
+      await fetch(`http://${espIP}/api/comando`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Basic '+btoa(WEB_USER+':'+getWebPass())},
+        body: JSON.stringify({cmd:'CONFIRMAR REEMBOLSO '+reembPendente.codigo}),
+        signal: AbortSignal.timeout(5000)
+      });
+    } catch(e){}
+  }
+
+  alert('✅ Reembolso confirmado! Entregue o valor de '+fmtR(reembPendente.valor)+' ao cliente.');
+  reembPendente = null;
+  fetchStatus();
+}
+
+function rejeitarReembolso(){
+  if(!confirm('Rejeitar reembolso? Isso registrará a tentativa inválida.')) return;
+  if(reembPendente) registrarHistReembolso(reembPendente, 'Código não conferido');
+  reembPendente = null;
+  fetchStatus();
+  alert('Reembolso rejeitado. Código não conferido.');
+}
+
+function registrarHistReembolso(r, status){
+  const tbody = document.getElementById('reembHistBody');
+  if(!tbody) return;
+  const now = new Date().toLocaleTimeString('pt-BR');
+  const row = document.createElement('tr');
+  row.style.borderBottom = '1px solid var(--border)';
+  row.innerHTML = `
+    <td>${now}</td>
+    <td>Manual</td>
+    <td>${r.metodo||'—'}</td>
+    <td style="color:var(--gold);">${fmtR(r.valor)}</td>
+    <td style="font-size:10px;">${r.codigo||'—'}</td>
+    <td><span class="badge ${status.includes('Confirm')?'badge-green':'badge-red'}">${status}</span></td>
+  `;
+  // Remove placeholder se existir
+  if(tbody.querySelector('td[colspan]')) tbody.innerHTML = '';
+  tbody.insertBefore(row, tbody.firstChild);
+}
+
+// ================================================================
+// CARTÃO PRESIDENT — CLIENTES (Firebase via painel gerente)
+// ================================================================
+let cartaoClientes = [];
+
+function carregarCartoes(){
+  const saved = localStorage.getItem('president_cartao_clientes');
+  if(saved){ try{ cartaoClientes = JSON.parse(saved); }catch(e){ cartaoClientes=[]; } }
+  renderTbodyCartao();
+  popularSelectRecarga();
+}
+
+function salvarCartoes(){
+  localStorage.setItem('president_cartao_clientes', JSON.stringify(cartaoClientes));
+}
+
+function mascaraCPF(input){
+  let v = input.value.replace(/\D/g,'');
+  if(v.length>11) v=v.slice(0,11);
+  v = v.replace(/(\d{3})(\d)/,'$1.$2');
+  v = v.replace(/(\d{3})\.(\d{3})(\d)/,'$1.$2.$3');
+  v = v.replace(/(\d{3})\.(\d{3})\.(\d{3})(\d)/,'$1.$2.$3-$4');
+  input.value = v;
+}
+
+function calcularIdade(dataNasc){
+  const nasc = new Date(dataNasc);
+  const hoje = new Date();
+  let idade = hoje.getFullYear() - nasc.getFullYear();
+  const m = hoje.getMonth() - nasc.getMonth();
+  if(m < 0 || (m===0 && hoje.getDate() < nasc.getDate())) idade--;
+  return idade;
+}
+
+function cadastrarCliente(){
+  const nome   = document.getElementById('cartaoNome').value.trim();
+  const cpf    = document.getElementById('cartaoCpf').value.trim();
+  const nasc   = document.getElementById('cartaoDataNasc').value;
+  const uid    = document.getElementById('cartaoUID').value.trim().toUpperCase();
+  const saldo  = parseFloat(document.getElementById('cartaoSaldoInicial').value) || 0;
+  const pin    = (document.getElementById('cartaoPin')?.value||'').replace(/[^0-9]/g,'');
+  const msg    = document.getElementById('cartaoCadMsg');
+
+  if(!nome){ showMsg(msg, '❌ Nome obrigatório.', 'red'); return; }
+  if(pin.length!==4){ showMsg(msg, '❌ PIN de 4 dígitos obrigatório.', 'red'); return; }
+  if(!cpf || cpf.replace(/\D/g,'').length !== 11){ showMsg(msg, '❌ CPF inválido.', 'red'); return; }
+  if(!nasc){ showMsg(msg, '❌ Data de nascimento obrigatória.', 'red'); return; }
+  const idade = calcularIdade(nasc);
+  if(idade < 18){ showMsg(msg, '🔞 VENDA BLOQUEADA — Menor de idade ('+idade+' anos).', 'red'); return; }
+
+  // Verifica duplicata CPF
+  if(cartaoClientes.find(c => c.cpf.replace(/\D/g,'') === cpf.replace(/\D/g,''))){
+    showMsg(msg, '⚠️ CPF já cadastrado!', 'orange'); return;
+  }
+  if(uid && cartaoClientes.find(c => c.uid === uid)){
+    showMsg(msg, '⚠️ UID de cartão já cadastrado!', 'orange'); return;
+  }
+
+  const cliente = {
+    id: Date.now(),
+    nome, cpf, nasc, uid, saldo, pin, bloqueado: false, motivoBloqueio: '',
+    cadastro: new Date().toLocaleDateString('pt-BR'),
+    ts: new Date().toISOString(),
+    operador: operadorLogado
+  };
+  cartaoClientes.push(cliente);
+  salvarCartoes();
+  renderTbodyCartao();
+  popularSelectRecarga();
+
+  // Limpar campos
+  document.getElementById('cartaoNome').value = '';
+  document.getElementById('cartaoCpf').value = '';
+  document.getElementById('cartaoDataNasc').value = '';
+  document.getElementById('cartaoUID').value = '';
+  document.getElementById('cartaoSaldoInicial').value = '0';
+  if(document.getElementById('cartaoPin')) document.getElementById('cartaoPin').value = '';
+
+  showMsg(msg, '✅ Cliente cadastrado com sucesso! Saldo: '+fmtR(saldo), 'green');
+
+  // Tenta sync com ESP32
+  if(espIP && uid){
+    fetch(`http://${espIP}/api/comando`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Basic '+btoa(WEB_USER+':'+getWebPass())},
+      body: JSON.stringify({cmd:'CARTAO ADD '+uid+' '+saldo.toFixed(2)}),
+      signal: AbortSignal.timeout(5000)
+    }).catch(()=>{});
+  }
+}
+
+function showMsg(el, txt, cor){
+  if(!el) return;
+  el.style.display = 'block';
+  el.style.color = cor === 'red' ? 'var(--red)' : cor === 'green' ? 'var(--green)' : 'var(--orange)';
+  el.textContent = txt;
+  setTimeout(() => { el.style.display='none'; }, 4000);
+}
+
+function selecionarClienteRecarga(){
+  const sel = document.getElementById('recargaSelect');
+  const idx = parseInt(sel.value);
+  const info = document.getElementById('recargaClienteInfo');
+  if(isNaN(idx)){ info.style.display='none'; return; }
+  const c = cartaoClientes[idx];
+  if(!c){ info.style.display='none'; return; }
+  info.style.display = 'block';
+  setText('recargaNomeCliente', c.nome);
+  setText('recargaSaldoAtual', fmtR(c.saldo));
+}
+
+function setRecarga(v){
+  document.getElementById('recargaValor').value = v.toFixed(2);
+}
+
+function lerCartaoRFID(){
+  if(!espIP){ alert('Configure o IP do ESP32 primeiro.'); return; }
+  alert('📡 Aproxime o cartão ao leitor RFID...\n\nA leitura automática requer conexão com o ESP32.');
+  // Polling por novo cartão
+  fetch(`http://${espIP}/api/status`, {
+    headers:{'Authorization':'Basic '+btoa(WEB_USER+':'+getWebPass())},
+    signal: AbortSignal.timeout(4000)
+  }).then(r=>r.json()).then(d=>{
+    if(d.rfidUltimo){ document.getElementById('cartaoUID').value = d.rfidUltimo; }
+  }).catch(()=>{});
+}
+
+function lerCartaoRFIDRecarga(){
+  if(!espIP){ alert('Configure o IP do ESP32 primeiro.'); return; }
+  fetch(`http://${espIP}/api/status`, {
+    headers:{'Authorization':'Basic '+btoa(WEB_USER+':'+getWebPass())},
+    signal: AbortSignal.timeout(4000)
+  }).then(r=>r.json()).then(d=>{
+    if(d.rfidUltimo){
+      const uid = d.rfidUltimo;
+      const idx = cartaoClientes.findIndex(c => c.uid === uid);
+      if(idx >= 0){
+        document.getElementById('recargaSelect').value = String(idx);
+        selecionarClienteRecarga();
+      } else {
+        alert('Cartão UID '+uid+' não encontrado. Cadastre primeiro.');
+      }
+    }
+  }).catch(()=>{});
+}
+
+function efetuarRecarga(){
+  const sel = document.getElementById('recargaSelect');
+  const idx = parseInt(sel.value);
+  const valor = parseFloat(document.getElementById('recargaValor').value);
+  const msgEl = document.getElementById('recargaMsg');
+
+  if(isNaN(idx)){ showMsg(msgEl, '❌ Selecione um cliente.', 'red'); return; }
+  if(isNaN(valor) || valor <= 0){ showMsg(msgEl, '❌ Valor inválido.', 'red'); return; }
+
+  const c = cartaoClientes[idx];
+  if(!c){ showMsg(msgEl, '❌ Cliente não encontrado.', 'red'); return; }
+
+  c.saldo += valor;
+  salvarCartoes();
+  renderTbodyCartao();
+  setText('recargaSaldoAtual', fmtR(c.saldo));
+  document.getElementById('recargaValor').value = '';
+
+  showMsg(msgEl, '✅ Saldo adicionado! Novo saldo: '+fmtR(c.saldo), 'green');
+
+  // Sync ESP32
+  if(espIP && c.uid){
+    fetch(`http://${espIP}/api/comando`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Basic '+btoa(WEB_USER+':'+getWebPass())},
+      body: JSON.stringify({cmd:'CARTAO SALDO '+c.uid+' '+c.saldo.toFixed(2)}),
+      signal: AbortSignal.timeout(5000)
+    }).catch(()=>{});
+  }
+}
+
+function popularSelectRecarga(){
+  const sel = document.getElementById('recargaSelect');
+  if(!sel) return;
+  const currentVal = sel.value;
+  sel.innerHTML = '<option value="">— Selecionar —</option>';
+  cartaoClientes.forEach((c,i) => {
+    const opt = document.createElement('option');
+    opt.value = String(i);
+    opt.textContent = c.nome + ' | ' + fmtR(c.saldo);
+    sel.appendChild(opt);
+  });
+  sel.value = currentVal;
+}
+
+function renderTbodyCartao(lista){
+  const dados = lista || cartaoClientes;
+  const tbody = document.getElementById('tbodyCartao');
+  const vazio = document.getElementById('cartaoVazio');
+  const countEl = document.getElementById('cartaoCount');
+  if(countEl) countEl.textContent = String(cartaoClientes.length);
+
+  if(!tbody) return;
+  if(dados.length === 0){
+    tbody.innerHTML = '';
+    if(vazio) vazio.style.display='block';
+    return;
+  }
+  if(vazio) vazio.style.display='none';
+
+  tbody.innerHTML = dados.map((c,i) => {
+    const realIdx = cartaoClientes.indexOf(c);
+    const bloqEl = c.bloqueado ? '<span style="font-size:9px;color:var(--red);font-family:IBM Plex Mono,monospace;display:block;">🔒 BLOQUEADO</span>' : '';
+    return `<tr>
+      <td>${realIdx+1}</td>
+      <td>${c.nome}${bloqEl}</td>
+      <td style="letter-spacing:2px;color:var(--gold);">${c.uid||'—'}</td>
+      <td style="color:var(--green);font-weight:600;">${fmtR(c.saldo)}</td>
+      <td style="text-align:center;">
+        <span style="font-size:10px;color:${c.pin?'var(--green)':'var(--red)'};font-family:'IBM Plex Mono',monospace;">${c.pin?'✅ Definido':'⚠️ Sem PIN'}</span><br>
+        <button class="btn-sm" style="margin-top:3px;background:rgba(212,160,23,0.1);color:var(--gold);border:1px solid rgba(212,160,23,0.3);" onclick="abrirModalPinOp('${c.uid}')">🔐 ALTERAR</button>
+      </td>
+      <td style="text-align:center;">
+        ${c.bloqueado
+          ? `<button class="btn-sm" style="background:rgba(45,186,110,0.15);color:var(--green);border:1px solid rgba(45,186,110,0.3);" onclick="desbloquearCartaoOp('${c.uid}')">🔓 DESBLOQUEAR</button>`
+          : `<button class="btn-sm" style="background:rgba(232,64,64,0.15);color:var(--red);border:1px solid rgba(232,64,64,0.3);" onclick="bloquearCartaoOp('${c.uid}')">🔒 BLOQUEAR</button>`}
+      </td>
+      <td>${c.cadastro||'—'}</td>
+      <td>
+        <button class="btn-sm" style="background:rgba(45,186,110,0.15);color:var(--green);border:1px solid rgba(45,186,110,0.3);" onclick="recargaRapida(${realIdx})">+ SALDO</button>
+        <button class="btn-sm" style="background:rgba(232,64,64,0.15);color:var(--red);border:1px solid rgba(232,64,64,0.3);margin-left:4px;" onclick="removerCliente(${realIdx})">REMOVER</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filtrarClientes(){
+  const q = document.getElementById('cartaoBusca').value.toLowerCase();
+  const filtrado = cartaoClientes.filter(c =>
+    c.nome.toLowerCase().includes(q) || (c.cpf||'').includes(q) || (c.uid||'').toLowerCase().includes(q)
+  );
+  renderTbodyCartao(filtrado);
+}
+
+function recargaRapida(idx){
+  const c = cartaoClientes[idx];
+  if(!c) return;
+  const v = parseFloat(prompt('Recarga rápida para '+c.nome+'\nSaldo atual: '+fmtR(c.saldo)+'\n\nValor a adicionar (R$):'));
+  if(isNaN(v) || v <= 0) return;
+  c.saldo += v;
+  salvarCartoes();
+  renderTbodyCartao();
+  popularSelectRecarga();
+  alert('✅ Saldo atualizado! Novo saldo: '+fmtR(c.saldo));
+  if(espIP && c.uid){
+    fetch(`http://${espIP}/api/comando`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Basic '+btoa(WEB_USER+':'+getWebPass())},
+      body: JSON.stringify({cmd:'CARTAO SALDO '+c.uid+' '+c.saldo.toFixed(2)}),
+      signal: AbortSignal.timeout(5000)
+    }).catch(()=>{});
+  }
+}
+
+// ================================================================
+// SOLICITAR PRIORIDADE / ABRIR SOLICITAÇÃO AO GERENTE
+// ================================================================
+function solicitarPrioridade(){
+  if(!reembPendente){ alert('Nenhum reembolso pendente para solicitar prioridade.'); return; }
+
+  // Salva solicitação de prioridade no localStorage para o gerente ver
+  const sol = {
+    tipo: 'PRIORIDADE',
+    operador: operadorLogado,
+    codigo: reembPendente.codigo,
+    valor: reembPendente.valor,
+    metodo: reembPendente.metodo,
+    ts: new Date().toISOString(),
+    hora: new Date().toLocaleTimeString('pt-BR'),
+    lida: false
+  };
+  const lista = JSON.parse(localStorage.getItem('president_solicitacoes')||'[]');
+  lista.push(sol);
+  localStorage.setItem('president_solicitacoes', JSON.stringify(lista));
+
+  alert('📩 Solicitação de prioridade enviada ao gerente!\n\nCódigo: '+reembPendente.codigo+'\nValor: '+fmtR(reembPendente.valor)+'\n\nO gerente verá o alerta ao abrir o painel.');
+}
+
+function abrirSolicitacao(){
+  const valor  = parseFloat(document.getElementById('solValor').value);
+  const metodo = document.getElementById('solMetodo').value;
+  const motivo = document.getElementById('solMotivo').value.trim();
+  const msgEl  = document.getElementById('solMsg');
+
+  if(isNaN(valor) || valor <= 0){ showMsg(msgEl,'❌ Informe o valor do reembolso.','red'); return; }
+
+  const sol = {
+    tipo: 'SOLICITACAO_OPERADOR',
+    operador: operadorLogado,
+    valor, metodo, motivo,
+    ts: new Date().toISOString(),
+    hora: new Date().toLocaleTimeString('pt-BR'),
+    lida: false
+  };
+  const lista = JSON.parse(localStorage.getItem('president_solicitacoes')||'[]');
+  lista.push(sol);
+  localStorage.setItem('president_solicitacoes', JSON.stringify(lista));
+
+  // Limpar campos
+  document.getElementById('solValor').value = '';
+  document.getElementById('solMotivo').value = '';
+
+  showMsg(msgEl,'✅ Solicitação enviada ao gerente! Aguarde autorização.','green');
+
+  // Tenta notificar via ESP32 se conectado
+  if(espIP){
+    fetch(`http://${espIP}/api/comando`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Basic '+btoa(WEB_USER+':'+getWebPass())},
+      body: JSON.stringify({cmd:'REEMBOLSO_SOL '+valor.toFixed(2)+' '+metodo}),
+      signal: AbortSignal.timeout(5000)
+    }).catch(()=>{});
+  }
+}
+
+
+function removerCliente(idx){
+  const c = cartaoClientes[idx];
+  if(!c) return;
+  if(!confirm('Remover cliente "'+c.nome+'"?\n\nEsta ação não pode ser desfeita.')) return;
+  cartaoClientes.splice(idx, 1);
+  salvarCartoes();
+  renderTbodyCartao();
+  popularSelectRecarga();
+}
+
+
+// ════════════════════════════════════════════════════════════════
+// BUZZER EMERGÊNCIA — operador
+// ════════════════════════════════════════════════════════════════
+function acionarBuzzer(){
+  if(!espIP){ alert('Sem conexão com o ESP32'); return; }
+  if(!confirm('🔔 Acionar BUZZER DE EMERGÊNCIA?\n\nO alarme vai soar na máquina.')) return;
+  fetch('http://'+espIP+'/api/comando',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Basic '+btoa(WEB_USER+':'+getWebPass())},
+    body: JSON.stringify({cmd:'BUZZER EMERGENCIA'}),
+    signal: AbortSignal.timeout(5000)
+  }).then(r=>r.json()).then(()=>{ alert('✅ Buzzer acionado!'); }).catch(()=>{ alert('⚠️ Sem resposta do ESP32.'); });
+}
+
+// ════════════════════════════════════════════════════════════════
+// CÂMERA MJPEG — operador (mesma lógica do gerente)
+// ════════════════════════════════════════════════════════════════
+let _camAtiva=false,_camErr=0,_camFrames=0,_camFpsIv=null;
+function conectarCamera(){
+  const ip=document.getElementById('camIP').value.trim();
+  const porta=document.getElementById('camPorta').value.trim()||'80';
+  const user=document.getElementById('camUser').value.trim();
+  const senha=document.getElementById('camSenha').value;
+  const path=document.getElementById('camPath').value.trim()||'/videostream.cgi';
+  if(!ip){alert('Informe o IP da câmera');return;}
+  localStorage.setItem('cam_ip',ip);localStorage.setItem('cam_porta',porta);
+  localStorage.setItem('cam_user',user);localStorage.setItem('cam_path',path);
+  let url=`http://${ip}:${porta}${path}`;
+  if(user) url+=(path.includes('?')?'&':'?')+`loginuse=${encodeURIComponent(user)}&loginpas=${encodeURIComponent(senha)}`;
+  const img=document.getElementById('camStream');
+  img.src=url+'&_t='+Date.now(); img.style.display='block';
+  document.getElementById('camOffline').style.display='none';
+  _camAtiva=true;_camErr=0;_camFrames=0;
+  const badge=document.getElementById('camStatusBadge');
+  if(badge){badge.textContent='CONECTANDO...';badge.style.background='var(--orange)';}
+  if(_camFpsIv) clearInterval(_camFpsIv);
+  _camFpsIv=setInterval(()=>{const el=document.getElementById('camFps');if(el)el.textContent=_camFrames+' frames/5s';_camFrames=0;},5000);
+}
+function desconectarCamera(){
+  _camAtiva=false;
+  const img=document.getElementById('camStream');img.src='';img.style.display='none';
+  document.getElementById('camOffline').style.display='block';
+  const badge=document.getElementById('camStatusBadge');
+  if(badge){badge.textContent='OFFLINE';badge.style.background='var(--red)';}
+  if(_camFpsIv){clearInterval(_camFpsIv);_camFpsIv=null;}
+}
+function camFrameOk(){_camErr=0;_camFrames++;const b=document.getElementById('camStatusBadge');if(b){b.textContent='AO VIVO';b.style.background='var(--green)';}}
+function camFrameErr(){_camErr++;const b=document.getElementById('camStatusBadge');if(b){b.textContent='ERRO';b.style.background='var(--red)';}
+  if(_camAtiva&&_camErr<5) setTimeout(()=>{const img=document.getElementById('camStream');if(img&&img.src)img.src=img.src.replace(/_t=\d+/,'_t='+Date.now());},3000);}
+function tirarSnapshot(){
+  const img=document.getElementById('camStream');
+  if(!img||!img.src||img.style.display==='none'){alert('Conecte a câmera primeiro');return;}
+  const c=document.createElement('canvas');c.width=img.naturalWidth||320;c.height=img.naturalHeight||240;
+  c.getContext('2d').drawImage(img,0,0);
+  const data=c.toDataURL('image/jpeg',0.9);
+  const ts=new Date().toLocaleString('pt-BR');
+  const grid=document.getElementById('snapshotGrid');
+  if(grid&&grid.querySelector('div[style*="Nenhum"]')) grid.innerHTML='';
+  const d=document.createElement('div');d.style.cssText='position:relative;width:140px;';
+  d.innerHTML=`<img src="${data}" style="width:140px;height:90px;object-fit:cover;border:1px solid var(--border);"/>
+    <div style="font-size:8px;color:var(--muted);font-family:IBM Plex Mono,monospace;text-align:center;">${ts}</div>
+    <a download="snap_${Date.now()}.jpg" href="${data}" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.7);color:#fff;font-size:10px;padding:2px 5px;text-decoration:none;">⬇</a>`;
+  if(grid) grid.prepend(d);
+}
+function limparSnapshots(){const g=document.getElementById('snapshotGrid');if(g)g.innerHTML='<div style="color:var(--muted);font-size:11px;font-family:IBM Plex Mono,monospace;width:100%;text-align:center;padding:20px 0;">Nenhum snapshot ainda.</div>';}
+function toggleFullscreen(){const el=document.getElementById('camContainer');if(!document.fullscreenElement)el.requestFullscreen().catch(()=>{});else document.exitFullscreen();}
+(function(){const ip=localStorage.getItem('cam_ip');if(!ip)return;
+  document.getElementById('camIP').value=ip;
+  document.getElementById('camPorta').value=localStorage.getItem('cam_porta')||'80';
+  document.getElementById('camUser').value=localStorage.getItem('cam_user')||'admin';
+  document.getElementById('camPath').value=localStorage.getItem('cam_path')||'/videostream.cgi';
+})();
+
+// ════════════════════════════════════════════════════════════════
+// PIN CARTÃO — operador (alterar a pedido do cliente)
+// ════════════════════════════════════════════════════════════════
+function abrirModalPinOp(uid){
+  const c=cartaoClientes.find(x=>x.uid===uid); if(!c) return;
+  let m=document.getElementById('_modalPinOp');
+  if(!m){
+    m=document.createElement('div');m.id='_modalPinOp';
+    m.style.cssText='display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;align-items:center;justify-content:center;';
+    m.innerHTML=`<div style="background:var(--panel);border:1px solid var(--gold);padding:28px;width:310px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold);letter-spacing:3px;margin-bottom:4px;">🔐 ALTERAR PIN</div>
+      <div id="_pinNomeOp" style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:14px;"></div>
+      <label style="font-size:9px;letter-spacing:2px;color:var(--muted);font-family:'IBM Plex Mono',monospace;text-transform:uppercase;">Novo PIN</label>
+      <input type="password" id="_pinNovoOp" maxlength="4" inputmode="numeric" placeholder="••••"
+        style="width:100%;font-size:30px;letter-spacing:12px;text-align:center;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--text);padding:10px;outline:none;margin:5px 0 10px;"
+        oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)"/>
+      <label style="font-size:9px;letter-spacing:2px;color:var(--muted);font-family:'IBM Plex Mono',monospace;text-transform:uppercase;">Confirmar PIN</label>
+      <input type="password" id="_pinConfOp" maxlength="4" inputmode="numeric" placeholder="••••"
+        style="width:100%;font-size:30px;letter-spacing:12px;text-align:center;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--text);padding:10px;outline:none;margin:5px 0 10px;"
+        oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)"/>
+      <div id="_pinMsgOp" style="font-size:11px;font-family:'IBM Plex Mono',monospace;min-height:14px;margin-bottom:10px;"></div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="salvarPinOp()" style="flex:1;padding:11px;background:var(--gold);color:#000;border:none;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;cursor:pointer;">SALVAR</button>
+        <button onclick="document.getElementById('_modalPinOp').style.display='none'" style="padding:11px 14px;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--muted);font-family:'Bebas Neue',sans-serif;font-size:13px;cursor:pointer;">CANCELAR</button>
+      </div></div>`;
+    document.body.appendChild(m);
+  }
+  document.getElementById('_pinNomeOp').textContent=c.nome+' — UID: '+uid;
+  document.getElementById('_pinNovoOp').value='';
+  document.getElementById('_pinConfOp').value='';
+  document.getElementById('_pinMsgOp').textContent='';
+  m.style.display='flex';
+  window._pinUIDOp=uid;
+}
+function salvarPinOp(){
+  const novo=document.getElementById('_pinNovoOp').value;
+  const conf=document.getElementById('_pinConfOp').value;
+  const msg=document.getElementById('_pinMsgOp');
+  if(novo.length!==4){msg.style.color='var(--red)';msg.textContent='⚠️ PIN deve ter 4 dígitos.';return;}
+  if(novo!==conf){msg.style.color='var(--red)';msg.textContent='⚠️ PINs não conferem.';return;}
+  const c=cartaoClientes.find(x=>x.uid===window._pinUIDOp); if(!c) return;
+  c.pin=novo; salvarCartoes(); renderTbodyCartao();
+  msg.style.color='var(--green)'; msg.textContent='✅ PIN alterado!';
+  setTimeout(()=>document.getElementById('_modalPinOp').style.display='none',1100);
+}
+
+// ════════════════════════════════════════════════════════════════
+// BLOQUEAR / DESBLOQUEAR — operador
+// ════════════════════════════════════════════════════════════════
+function bloquearCartaoOp(uid){
+  const c=cartaoClientes.find(x=>x.uid===uid); if(!c) return;
+  const motivo=prompt('🔒 BLOQUEAR cartão de '+c.nome+'?\n\nMotivo (perda, roubo, solicitação do cliente):');
+  if(motivo===null) return;
+  c.bloqueado=true; c.motivoBloqueio=motivo||'Sem motivo'; c.dataBloqueio=new Date().toLocaleString('pt-BR');
+  salvarCartoes(); renderTbodyCartao();
+  if(espIP) fetch('http://'+espIP+'/api/comando',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Basic '+btoa(WEB_USER+':'+getWebPass())},body:JSON.stringify({cmd:'CARTAO BLOQUEAR '+uid}),signal:AbortSignal.timeout(5000)}).catch(()=>{});
+  alert('✅ Cartão de '+c.nome+' bloqueado.');
+}
+function desbloquearCartaoOp(uid){
+  const c=cartaoClientes.find(x=>x.uid===uid); if(!c) return;
+  if(!confirm('🔓 DESBLOQUEAR cartão de '+c.nome+'?\nMotivo do bloqueio: '+(c.motivoBloqueio||'—'))) return;
+  c.bloqueado=false; c.motivoBloqueio=''; c.dataBloqueio='';
+  salvarCartoes(); renderTbodyCartao();
+  if(espIP) fetch('http://'+espIP+'/api/comando',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Basic '+btoa(WEB_USER+':'+getWebPass())},body:JSON.stringify({cmd:'CARTAO DESBLOQUEAR '+uid}),signal:AbortSignal.timeout(5000)}).catch(()=>{});
+}
+
+</script>
+</body>
+</html>

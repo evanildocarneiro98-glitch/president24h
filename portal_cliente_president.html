@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRESIDENT 24H — Portal do Cliente</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0c0f;--panel:#111418;--panel2:#13171d;--border:#1e2530;
+  --gold:#d4a017;--gold2:#f0c040;--red:#e84040;--green:#2dba6e;
+  --blue:#3d9cf0;--orange:#f07a20;--text:#c8d0dc;--muted:#5a6478;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:13px;min-height:100vh;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--border);}
+
+/* LOGIN */
+#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);position:fixed;inset:0;z-index:1000;}
+.login-outer{display:flex;flex-direction:column;align-items:center;}
+.login-badge{background:rgba(212,160,23,0.1);border:1px solid rgba(212,160,23,0.3);border-bottom:none;padding:7px 24px;font-size:10px;letter-spacing:3px;font-family:'IBM Plex Mono',monospace;color:var(--gold);text-transform:uppercase;}
+.login-box{background:var(--panel);border:1px solid var(--gold);padding:44px 40px 36px;width:420px;position:relative;box-shadow:0 0 80px rgba(212,160,23,0.1);}
+.login-box::before{content:'';position:absolute;top:-1px;left:24px;right:24px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.login-logo{font-family:'Bebas Neue',sans-serif;font-size:44px;letter-spacing:6px;color:var(--gold);text-align:center;line-height:1;margin-bottom:3px;}
+.login-sub{text-align:center;color:var(--muted);font-size:10px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;font-family:'IBM Plex Mono',monospace;}
+.login-divider{height:1px;background:var(--border);margin:22px 0 24px;}
+.login-type-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:26px;}
+.type-btn{border:1px solid var(--border);background:transparent;color:var(--muted);padding:14px 8px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;transition:all .2s;text-align:center;}
+.type-btn:hover{border-color:var(--gold);color:var(--gold);}
+.type-btn.active{border-color:var(--gold);background:rgba(212,160,23,0.08);color:var(--gold);}
+.type-btn .tb-icon{font-size:22px;display:block;margin-bottom:6px;}
+.login-field{margin-bottom:18px;}
+.login-field label{display:block;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-family:'IBM Plex Mono',monospace;}
+.login-field input{width:100%;background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--text);padding:13px 14px;font-family:'IBM Plex Mono',monospace;font-size:14px;outline:none;transition:border-color .2s;letter-spacing:2px;}
+.login-field input:focus{border-color:var(--gold);}
+.login-field input::placeholder{color:var(--muted);letter-spacing:1px;font-size:12px;}
+.btn-login{width:100%;background:var(--gold);color:#000;border:none;padding:15px;font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:3px;cursor:pointer;margin-top:4px;transition:background .2s;}
+.btn-login:hover{background:var(--gold2);}
+.btn-login:disabled{opacity:.5;cursor:not-allowed;}
+#loginError{color:var(--red);text-align:center;font-size:11px;margin-top:14px;font-family:'IBM Plex Mono',monospace;display:none;background:rgba(232,64,64,0.08);border:1px solid rgba(232,64,64,0.3);padding:10px;}
+.login-footer{text-align:center;margin-top:18px;font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+.login-demo{text-align:center;margin-top:10px;font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;background:rgba(61,156,240,0.06);border:1px solid rgba(61,156,240,0.2);padding:8px;}
+.login-demo span{color:var(--blue);}
+
+/* APP */
+#app{display:none;}
+.topbar{background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:52px;position:sticky;top:0;z-index:100;}
+.topbar-brand{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:4px;color:var(--gold);}
+.topbar-right{display:flex;align-items:center;gap:16px;}
+.topbar-clock{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted);}
+.topbar-user{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text);}
+.btn-logout{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 14px;font-size:11px;cursor:pointer;font-family:'IBM Plex Mono',monospace;transition:all .2s;}
+.btn-logout:hover{border-color:var(--red);color:var(--red);}
+.dot-live{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;display:inline-block;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+.nav-tabs{display:flex;gap:0;background:var(--panel);border-bottom:1px solid var(--border);padding:0 24px;overflow-x:auto;}
+.nav-tab{padding:14px 20px;cursor:pointer;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;white-space:nowrap;}
+.nav-tab:hover{color:var(--text);}
+.nav-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+
+.main-content{padding:24px;max-width:1100px;margin:0 auto;}
+.page{display:none;}.page.active{display:block;}
+
+.card{background:var(--panel);border:1px solid var(--border);padding:22px;}
+.card-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:16px;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:2px;line-height:1;margin-bottom:3px;}
+.stat-lbl{font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+.color-gold{color:var(--gold);}
+.color-green{color:var(--green);}
+.color-blue{color:var(--blue);}
+.color-red{color:var(--red);}
+
+.saldo-hero{background:var(--panel);border:1px solid var(--gold);padding:28px 32px;position:relative;overflow:hidden;margin-bottom:20px;}
+.saldo-hero::before{content:'';position:absolute;top:-1px;left:40px;right:40px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.saldo-hero-value{font-family:'Bebas Neue',sans-serif;font-size:72px;color:var(--gold);line-height:1;letter-spacing:3px;}
+.saldo-hero-glow{position:absolute;right:-40px;top:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(212,160,23,0.07),transparent 70%);pointer-events:none;}
+
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:3px 10px;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;text-transform:uppercase;}
+.badge-gold{background:rgba(212,160,23,0.15);color:var(--gold);border:1px solid rgba(212,160,23,0.3);}
+.badge-green{background:rgba(45,186,110,0.15);color:var(--green);border:1px solid rgba(45,186,110,0.3);}
+.badge-red{background:rgba(232,64,64,0.15);color:var(--red);border:1px solid rgba(232,64,64,0.3);}
+.badge-blue{background:rgba(61,156,240,0.15);color:var(--blue);border:1px solid rgba(61,156,240,0.3);}
+.badge-muted{background:rgba(90,100,120,0.2);color:var(--muted);border:1px solid var(--border);}
+.badge-orange{background:rgba(240,122,32,0.15);color:var(--orange);border:1px solid rgba(240,122,32,0.3);}
+
+.table{width:100%;border-collapse:collapse;}
+.table th{text-align:left;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-family:'IBM Plex Mono',monospace;padding:0 12px 12px;border-bottom:1px solid var(--border);}
+.table td{padding:11px 12px;font-size:12px;border-bottom:1px solid rgba(30,37,48,.5);font-family:'IBM Plex Mono',monospace;}
+.table tr:last-child td{border-bottom:none;}
+.table tr:hover td{background:rgba(255,255,255,.02);}
+
+.btn-action{padding:11px 24px;border:none;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;transition:opacity .2s;}
+.btn-action:hover{opacity:.85;}
+.btn-gold{background:var(--gold);color:#000;}
+.btn-green{background:var(--green);color:#000;}
+.btn-blue{background:var(--blue);color:#000;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text);padding:10px 20px;font-family:'IBM Plex Mono',monospace;font-size:11px;cursor:pointer;letter-spacing:1px;transition:all .2s;}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold);}
+
+.recarga-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0;}
+.recarga-btn{background:rgba(212,160,23,0.08);border:1px solid rgba(212,160,23,0.25);color:var(--gold);padding:14px 8px;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;text-align:center;transition:all .2s;}
+.recarga-btn:hover{background:rgba(212,160,23,0.2);border-color:var(--gold);}
+.input-field{width:100%;background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--text);padding:12px 14px;font-family:'IBM Plex Mono',monospace;font-size:14px;outline:none;transition:border-color .2s;letter-spacing:1px;}
+.input-field:focus{border-color:var(--gold);}
+select.input-field option{background:var(--panel);}
+.field-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-family:'IBM Plex Mono',monospace;display:block;}
+.field-wrap{margin-bottom:18px;}
+
+.card-visual{width:100%;max-width:340px;height:196px;background:linear-gradient(135deg,#1a1d24,#0d1018);border:1px solid rgba(212,160,23,0.4);position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.5);}
+.card-visual::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;background:linear-gradient(90deg,transparent,var(--gold),var(--gold2),var(--gold),transparent);}
+.card-visual::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2.5px;background:linear-gradient(90deg,transparent,var(--gold),var(--gold2),var(--gold),transparent);}
+.cv-glow{position:absolute;top:-30px;right:-30px;width:160px;height:160px;background:radial-gradient(circle,rgba(212,160,23,0.1),transparent 70%);}
+.cv-brand{position:absolute;top:18px;left:20px;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:5px;color:var(--gold);}
+.cv-sub{position:absolute;top:44px;left:20px;font-size:7px;letter-spacing:4px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+.cv-tipo{position:absolute;top:14px;right:14px;}
+.cv-uid{position:absolute;top:78px;left:20px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:rgba(200,208,220,0.5);letter-spacing:3px;}
+.cv-nome{position:absolute;bottom:36px;left:20px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text);letter-spacing:2px;text-transform:uppercase;}
+.cv-num{position:absolute;bottom:16px;left:20px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:3px;}
+.cv-saldo{position:absolute;bottom:16px;right:18px;text-align:right;}
+.cv-saldo-label{font-size:7px;letter-spacing:2px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+.cv-saldo-value{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold);letter-spacing:2px;line-height:1;}
+
+.fatura-valor-box{background:rgba(212,160,23,0.06);border:1px solid rgba(212,160,23,0.25);padding:18px 24px;text-align:center;}
+.fatura-valor-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:4px;}
+.fatura-valor{font-family:'Bebas Neue',sans-serif;font-size:44px;color:var(--gold);letter-spacing:2px;line-height:1;}
+.fatura-venc{font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:4px;}
+
+.prog-bg{background:rgba(255,255,255,0.06);height:8px;margin-top:8px;}
+.prog-fill{height:100%;transition:width .6s ease;}
+
+.alerta-rec{background:rgba(61,156,240,0.08);border:1px solid rgba(61,156,240,0.3);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap;}
+
+.notif{position:fixed;bottom:24px;right:24px;padding:14px 20px;font-family:'IBM Plex Mono',monospace;font-size:12px;z-index:9999;border:1px solid;transform:translateX(140%);transition:transform .3s;}
+.notif.show{transform:translateX(0);}
+.notif-ok{background:rgba(45,186,110,0.15);border-color:rgba(45,186,110,0.5);color:var(--green);}
+.notif-err{background:rgba(232,64,64,0.15);border-color:rgba(232,64,64,0.5);color:var(--red);}
+.notif-info{background:rgba(61,156,240,0.15);border-color:rgba(61,156,240,0.5);color:var(--blue);}
+
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,0.2);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:2000;align-items:center;justify-content:center;}
+.modal-overlay.active{display:flex;}
+.modal-box{background:var(--panel);border:1px solid var(--gold);padding:36px;width:400px;max-width:95vw;position:relative;text-align:center;}
+.modal-box::before{content:'';position:absolute;top:-1px;left:24px;right:24px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--gold);margin-bottom:6px;}
+.modal-close{position:absolute;top:14px;right:14px;background:transparent;border:1px solid var(--border);color:var(--muted);padding:4px 10px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11px;transition:all .2s;}
+.modal-close:hover{border-color:var(--red);color:var(--red);}
+
+.pix-qr-box{background:#fff;padding:12px;display:inline-block;margin:0 auto 14px;border:3px solid var(--gold);}
+.pix-code{background:rgba(0,0,0,0.3);border:1px solid var(--border);padding:10px 14px;font-family:'IBM Plex Mono',monospace;font-size:10px;word-break:break-all;color:var(--text);margin-bottom:10px;text-align:left;}
+.btn-copy{background:rgba(61,156,240,0.1);border:1px solid rgba(61,156,240,0.4);color:var(--blue);padding:8px 16px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11px;width:100%;letter-spacing:1px;transition:all .2s;}
+.btn-copy:hover{background:var(--blue);color:#000;}
+
+@media(max-width:768px){
+  .grid-4{grid-template-columns:repeat(2,1fr);}
+  .grid-3{grid-template-columns:1fr 1fr;}
+  .grid-2{grid-template-columns:1fr;}
+  .recarga-grid{grid-template-columns:repeat(3,1fr);}
+  .login-box{width:95vw;padding:28px 20px;}
+  .saldo-hero-value{font-size:52px;}
+  .fatura-valor{font-size:32px;}
+  .main-content{padding:16px;}
+}
+</style>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, getDoc, setDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const cfg={apiKey:"AIzaSyCPkuzIZ3RURx9NIZ8IAd96QNBVNmPIPK4",authDomain:"president24horas.firebaseapp.com",projectId:"president24horas",storageBucket:"president24horas.firebasestorage.app",messagingSenderId:"918465727190",appId:"1:918465727190:web:8364fbcd6f08c185985777"};
+const app=getApps().find(a=>a.name==='portal')||initializeApp(cfg,'portal');
+const db=getFirestore(app);
+window._pdb=db;window._pcol=collection;window._pdoc=doc;window._pget=getDoc;window._pgetDocs=getDocs;window._pset=setDoc;window._pquery=query;window._pwhere=where;
+window._fbPortalReady=true;
+</script>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-outer">
+    <div class="login-badge">🍺 Portal do Cliente</div>
+    <div class="login-box">
+      <div class="login-logo">PRESIDENT</div>
+      <div class="login-sub">Acesso ao seu cartão · 24 horas</div>
+      <div class="login-divider"></div>
+      <div class="login-type-tabs">
+        <button class="type-btn active" id="btnTipoPre" onclick="setTipo('prepago')">
+          <span class="tb-icon">💳</span>CARTÃO PRÉ-PAGO
+        </button>
+        <button class="type-btn" id="btnTipoMensal" onclick="setTipo('mensal')">
+          <span class="tb-icon">📅</span>MENSAL / PLANO
+        </button>
+      </div>
+      <div class="login-field">
+        <label id="labelCartao">Número do cartão (ID RFID)</label>
+        <input type="text" id="inputCartao" placeholder="Ex: A3F5B2C1" maxlength="30" oninput="this.value=this.value.toUpperCase()" autocomplete="off"/>
+      </div>
+      <div class="login-field">
+        <label>CPF</label>
+        <input type="text" id="inputCpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCpf(this)" autocomplete="off"/>
+      </div>
+      <button class="btn-login" id="btnEntrar" onclick="doLogin()">ACESSAR MEU CARTÃO</button>
+      <div id="loginError">⚠ Cartão ou CPF não encontrado. Verifique os dados.</div>
+      <div class="login-footer">🔒 Seus dados são protegidos</div>
+      <div class="login-demo">Teste: cartão <span>DEMO1234</span> · CPF <span>123.456.789-01</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-brand">🍺 PRESIDENT 24H</div>
+    <div class="topbar-right">
+      <span class="dot-live"></span>
+      <span class="topbar-user" id="topbarNome">—</span>
+      <span class="topbar-clock" id="clock">00:00:00</span>
+      <button class="btn-logout" onclick="doLogout()">SAIR</button>
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <div class="nav-tab active"  onclick="goPage('inicio',this)">🏠 INÍCIO</div>
+    <div class="nav-tab" onclick="goPage('cartao',this)">💳 MEU CARTÃO</div>
+    <div class="nav-tab" onclick="goPage('recarga',this)">💰 RECARGA</div>
+    <div class="nav-tab" onclick="goPage('fatura',this)">📄 FATURA</div>
+    <div class="nav-tab" onclick="goPage('historico',this)">📊 HISTÓRICO</div>
+  </div>
+
+  <div class="main-content">
+
+    <!-- INÍCIO -->
+    <div class="page active" id="page-inicio">
+      <div class="alerta-rec" id="alertaRec" style="display:none;">
+        <div>
+          <div style="font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--blue);font-weight:600;margin-bottom:2px;">⚡ SALDO BAIXO</div>
+          <div>Seu saldo está abaixo de R$ 10,00 — recarregue agora!</div>
+        </div>
+        <button class="btn-action btn-blue" style="font-size:13px;padding:9px 18px;" onclick="goPage('recarga',document.querySelectorAll('.nav-tab')[2])">RECARREGAR</button>
+      </div>
+      <div class="saldo-hero">
+        <div class="saldo-hero-glow"></div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div style="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:8px;">Saldo disponível</div>
+            <div class="saldo-hero-value" id="heroSaldo">R$ —</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-top:8px;" id="heroMeta">—</div>
+          </div>
+          <div style="text-align:right;"><div id="heroBadge" class="badge badge-gold">—</div><div style="margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);" id="heroUid">—</div></div>
+        </div>
+        <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn-action btn-gold" onclick="goPage('recarga',document.querySelectorAll('.nav-tab')[2])">💰 FAZER RECARGA</button>
+          <button class="btn-action btn-outline" onclick="goPage('historico',document.querySelectorAll('.nav-tab')[4])">📊 HISTÓRICO</button>
+          <button class="btn-action btn-outline" onclick="exportarPDF()">⬇️ SALVAR PDF</button>
+        </div>
+      </div>
+      <div class="grid-4" style="margin-bottom:20px;">
+        <div class="card"><div class="card-title">Gasto este mês</div><div class="stat-val color-gold" id="statMes" style="font-size:32px;">—</div><div class="stat-lbl" id="statMesNome">—</div></div>
+        <div class="card"><div class="card-title">Consumos hoje</div><div class="stat-val color-green" id="statHoje" style="font-size:32px;">0</div><div class="stat-lbl">transações</div></div>
+        <div class="card"><div class="card-title">Último consumo</div><div class="stat-val" id="statUltVal" style="font-size:22px;margin-top:4px;">—</div><div class="stat-lbl" id="statUltData">—</div></div>
+        <div class="card"><div class="card-title">Cliente desde</div><div class="stat-val" id="statSince" style="font-size:20px;margin-top:4px;">—</div><div class="stat-lbl" id="statIdade">—</div></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <div class="card-title" style="margin:0;">Últimas transações</div>
+          <button class="btn-outline" style="padding:6px 14px;font-size:10px;" onclick="goPage('historico',document.querySelectorAll('.nav-tab')[4])">VER TUDO</button>
+        </div>
+        <div id="resumoTrans"><div style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px;padding:16px 0;text-align:center;">Carregando...</div></div>
+      </div>
+    </div>
+
+    <!-- MEU CARTÃO -->
+    <div class="page" id="page-cartao">
+      <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;margin-bottom:20px;">
+        <div>
+          <div class="card-title">Seu cartão President</div>
+          <div class="card-visual">
+            <div class="cv-glow"></div>
+            <div class="cv-brand">PRESIDENT</div>
+            <div class="cv-sub">24 HORAS</div>
+            <div class="cv-tipo" id="cvTipo"><span class="badge badge-gold">PRÉ-PAGO</span></div>
+            <div class="cv-uid" id="cvUid">•••• •••• ••••</div>
+            <div class="cv-nome" id="cvNome">—</div>
+            <div class="cv-num" id="cvNum">—</div>
+            <div class="cv-saldo"><div class="cv-saldo-label">SALDO</div><div class="cv-saldo-value" id="cvSaldo">—</div></div>
+          </div>
+        </div>
+        <div style="flex:1;min-width:260px;">
+          <div class="card-title">Dados cadastrais</div>
+          <div class="card">
+            <table style="width:100%;border-collapse:collapse;">
+              <tr><td style="padding:10px 0;border-bottom:1px solid var(--border);color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;width:120px;">Nome</td><td style="padding:10px 0;border-bottom:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:12px;" id="dadoNome">—</td></tr>
+              <tr><td style="padding:10px 0;border-bottom:1px solid var(--border);color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;">CPF</td><td style="padding:10px 0;border-bottom:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:12px;" id="dadoCpf">—</td></tr>
+              <tr><td style="padding:10px 0;border-bottom:1px solid var(--border);color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;">Nº Cartão</td><td style="padding:10px 0;border-bottom:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:12px;" id="dadoNum">—</td></tr>
+              <tr><td style="padding:10px 0;border-bottom:1px solid var(--border);color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;">Tipo</td><td style="padding:10px 0;border-bottom:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:12px;" id="dadoTipo">—</td></tr>
+              <tr><td style="padding:10px 0;border-bottom:1px solid var(--border);color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;">Cadastro</td><td style="padding:10px 0;border-bottom:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:12px;" id="dadoCad">—</td></tr>
+              <tr><td style="padding:10px 0;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;">Status</td><td style="padding:10px 0;" id="dadoStatus"><span class="badge badge-green">● ATIVO</span></td></tr>
+            </table>
+            <div style="margin-top:18px;"><button class="btn-outline" onclick="exportarPDF()">⬇️ BAIXAR EXTRATO PDF</button></div>
+          </div>
+        </div>
+      </div>
+      <div id="secMensal" style="display:none;">
+        <div class="card-title">Informações do plano mensal</div>
+        <div class="grid-3">
+          <div class="card"><div class="card-title">Plano</div><div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--gold);" id="planNome">MENSAL</div><div class="stat-lbl" id="planDesc">—</div></div>
+          <div class="card"><div class="card-title">Próximo vencimento</div><div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--orange);" id="planVenc">—</div><div class="stat-lbl" id="planVencDias">—</div></div>
+          <div class="card"><div class="card-title">Situação</div><div id="planStatus"><span class="badge badge-green">EM DIA</span></div><div class="stat-lbl" id="planStatusDesc" style="margin-top:8px;">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECARGA -->
+    <div class="page" id="page-recarga">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Recarregar meu cartão</div>
+          <div style="background:rgba(212,160,23,0.05);border:1px solid rgba(212,160,23,0.2);padding:16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:1px;margin-bottom:4px;">SALDO ATUAL</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--gold);" id="recSaldoAtual">R$ —</div>
+            </div>
+            <div style="font-size:32px;">💳</div>
+          </div>
+          <div class="field-wrap">
+            <label class="field-label">Valor da recarga (R$)</label>
+            <input type="number" class="input-field" id="recValor" placeholder="0,00" min="1" step="0.50"/>
+          </div>
+          <div class="recarga-grid">
+            <button class="recarga-btn" onclick="setRec(10)">R$&nbsp;10</button>
+            <button class="recarga-btn" onclick="setRec(20)">R$&nbsp;20</button>
+            <button class="recarga-btn" onclick="setRec(30)">R$&nbsp;30</button>
+            <button class="recarga-btn" onclick="setRec(50)">R$&nbsp;50</button>
+            <button class="recarga-btn" onclick="setRec(80)">R$&nbsp;80</button>
+            <button class="recarga-btn" onclick="setRec(100)">R$&nbsp;100</button>
+            <button class="recarga-btn" onclick="setRec(150)">R$&nbsp;150</button>
+            <button class="recarga-btn" onclick="setRec(200)">R$&nbsp;200</button>
+          </div>
+          <div class="field-wrap" style="margin-top:16px;">
+            <label class="field-label">Forma de pagamento</label>
+            <select class="input-field" id="recMetodo">
+              <option value="pix">PIX (instantâneo)</option>
+              <option value="credito">Cartão de crédito</option>
+              <option value="dinheiro">Dinheiro (no balcão)</option>
+            </select>
+          </div>
+          <button class="btn-action btn-gold" style="width:100%;font-size:18px;padding:14px;" onclick="abrirRecarga()">💰 GERAR COBRANÇA</button>
+          <div id="recMsg" style="margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:11px;display:none;padding:10px;border:1px solid;"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Histórico de recargas</div>
+          <div id="listaRecargas"><div style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px;padding:16px 0;text-align:center;">Carregando...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FATURA -->
+    <div class="page" id="page-fatura">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+        <div><div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;">FATURA</div><div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;" id="fatSubtitle">—</div></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <select class="input-field" id="fatFiltroMes" style="width:auto;padding:8px 12px;font-size:11px;" onchange="renderFatura()">
+            <option value="0">Este mês</option><option value="1">Mês passado</option><option value="2">2 meses atrás</option><option value="3">3 meses atrás</option>
+          </select>
+          <button class="btn-outline" onclick="exportarPDF()">⬇️ PDF</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:16px;">
+          <div>
+            <div style="font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Cliente</div>
+            <div style="font-size:15px;font-weight:600;" id="fatNome">—</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);" id="fatCpf">—</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);" id="fatCartao">—</div>
+            <div style="margin-top:12px;font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;letter-spacing:1px;text-transform:uppercase;">Período</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;" id="fatPeriodo">—</div>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <div class="fatura-valor-box"><div class="fatura-valor-label">Total consumido</div><div class="fatura-valor" id="fatTotal">R$ 0,00</div><div class="fatura-venc" id="fatQtd">0 consumos</div></div>
+            <div class="fatura-valor-box"><div class="fatura-valor-label">Total recarregado</div><div class="fatura-valor" style="color:var(--green);" id="fatRec">R$ 0,00</div><div class="fatura-venc" id="fatRecQtd">0 recargas</div></div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:4px;"><span>Consumo do mês</span><span id="fatPctLbl">—</span></div>
+        <div class="prog-bg"><div class="prog-fill" id="fatProg" style="background:var(--gold);width:0%;"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Lançamentos do período</div>
+        <div id="fatTabela"><div style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px;padding:16px 0;text-align:center;">Carregando fatura...</div></div>
+      </div>
+    </div>
+
+    <!-- HISTÓRICO -->
+    <div class="page" id="page-historico">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;">HISTÓRICO DE USO</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <select class="input-field" id="histFiltro" style="width:auto;padding:8px 12px;font-size:11px;" onchange="renderHistorico()">
+            <option value="todos">Todos</option><option value="consumo">Consumos</option><option value="recarga">Recargas</option><option value="devolucao">Devoluções</option>
+          </select>
+          <button class="btn-outline" onclick="exportarPDF()">⬇️ PDF</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-title">Consumo mensal (últimos 6 meses)</div>
+        <div style="display:flex;gap:6px;align-items:flex-end;height:80px;padding:8px 0;" id="grafico"></div>
+        <div style="display:flex;gap:6px;margin-top:4px;" id="graficoLabels"></div>
+      </div>
+      <div class="grid-4" style="margin-bottom:16px;">
+        <div class="card"><div class="card-title">Total consumido</div><div class="stat-val color-gold" id="hTotCons" style="font-size:26px;">—</div><div class="stat-lbl">histórico geral</div></div>
+        <div class="card"><div class="card-title">Total recargas</div><div class="stat-val color-green" id="hTotRec" style="font-size:26px;">—</div><div class="stat-lbl">histórico geral</div></div>
+        <div class="card"><div class="card-title">Nº de consumos</div><div class="stat-val color-blue" id="hQtd" style="font-size:26px;">—</div><div class="stat-lbl">transações</div></div>
+        <div class="card"><div class="card-title">Ticket médio</div><div class="stat-val" id="hTicket" style="font-size:26px;">—</div><div class="stat-lbl">por consumo</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Todos os lançamentos</div>
+        <div id="histTabela"><div style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px;padding:16px 0;text-align:center;">Carregando...</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL PIX -->
+<div class="modal-overlay" id="modalPix">
+  <div class="modal-box">
+    <button class="modal-close" onclick="fecharPix()">✕ FECHAR</button>
+    <div class="modal-title">💰 PAGAMENTO VIA PIX</div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:16px;">Escaneie ou copie a chave PIX</div>
+    <div class="pix-qr-box"><canvas id="qrCanvas" width="148" height="148"></canvas></div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:6px;">CHAVE PIX</div>
+    <div class="pix-code" id="pixChave">contato@president24h.com.br</div>
+    <button class="btn-copy" onclick="copiarPix()">📋 COPIAR CHAVE PIX</button>
+    <div style="margin-top:14px;background:rgba(212,160,23,0.06);border:1px solid rgba(212,160,23,0.2);padding:12px;">
+      <div style="font-size:9px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:3px;">VALOR</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:34px;color:var(--gold);" id="pixValor">R$ 0,00</div>
+      <div style="font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:4px;">Saldo creditado em até 5 minutos após confirmação</div>
+    </div>
+    <button class="btn-action btn-green" style="width:100%;margin-top:14px;font-size:15px;" onclick="confirmarPagto()">✅ JÁ REALIZEI O PAGAMENTO</button>
+  </div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+// ── ESTADO ──
+let cliente = null;
+let tipoCartao = 'prepago';
+let lancamentos = [];
+
+// ── UTILS ──
+function mascaraCpf(el){
+  let v=el.value.replace(/\D/g,'').slice(0,11);
+  v=v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})\.(\d{3})(\d)/,'$1.$2.$3').replace(/(\d{3})\.(\d{3})\.(\d{3})(\d{1,2})$/,'$1.$2.$3-$4');
+  el.value=v;
+}
+function R(v){return 'R$ '+(v||0).toFixed(2).replace('.',',');}
+function fmtDT(d){
+  if(!d) return '—';
+  if(d&&d.toDate) d=d.toDate();
+  if(typeof d==='string') d=new Date(d);
+  if(!(d instanceof Date)||isNaN(d)) return '—';
+  return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+function fmtD(d){
+  if(!d) return '—';
+  if(d&&d.toDate) d=d.toDate();
+  if(typeof d==='string') d=new Date(d);
+  if(!(d instanceof Date)||isNaN(d)) return '—';
+  return d.toLocaleDateString('pt-BR');
+}
+function notif(msg,tipo='ok'){
+  const el=document.getElementById('notif');
+  el.textContent=msg; el.className=`notif notif-${tipo} show`;
+  setTimeout(()=>el.classList.remove('show'),3500);
+}
+setInterval(()=>{const e=document.getElementById('clock');if(e)e.textContent=new Date().toLocaleTimeString('pt-BR');},1000);
+
+// ── TIPO ──
+function setTipo(t){
+  tipoCartao=t;
+  document.getElementById('btnTipoPre').classList.toggle('active',t==='prepago');
+  document.getElementById('btnTipoMensal').classList.toggle('active',t==='mensal');
+  document.getElementById('labelCartao').textContent = t==='prepago'?'Número do cartão (ID RFID)':'Código do assinante / UID';
+}
+
+// ── NAVEGAÇÃO ──
+function goPage(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  const pg=document.getElementById('page-'+id);
+  if(pg) pg.classList.add('active');
+  if(el) el.classList.add('active');
+  if(id==='historico') renderHistorico();
+  if(id==='fatura')    renderFatura();
+  if(id==='recarga')   renderRecargas();
+}
+
+// ── LOGIN ──
+async function doLogin(){
+  const uid=document.getElementById('inputCartao').value.trim().toUpperCase();
+  const cpfRaw=document.getElementById('inputCpf').value.replace(/\D/g,'');
+  const errEl=document.getElementById('loginError');
+  const btn=document.getElementById('btnEntrar');
+  errEl.style.display='none';
+  if(!uid||cpfRaw.length<11){
+    errEl.textContent='⚠ Preencha o cartão e o CPF completo.'; errEl.style.display='block'; return;
+  }
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span>VERIFICANDO...';
+
+  for(let i=0;i<30;i++){ if(window._pdb) break; await new Promise(r=>setTimeout(r,200)); }
+
+  let c=null;
+  try {
+    if(window._pdb){
+      const db=window._pdb;
+      // Busca cartões President (localStorage mirror no Firebase)
+      try{
+        const snap=await window._pgetDocs(window._pquery(window._pcol(db,'cartoes_president'),window._pwhere('uid','==',uid)));
+        if(!snap.empty){
+          const d=snap.docs[0].data();
+          if((d.cpf||'').replace(/\D/g,'')=== cpfRaw) c={...d,_doc:snap.docs[0].id,_col:'cartoes_president'};
+        }
+      }catch(e){}
+      // Busca cadastros CPF-based
+      if(!c){
+        try{
+          const cpfFmt=cpfRaw.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4');
+          const snap2=await window._pgetDocs(window._pquery(window._pcol(db,'cadastros'),window._pwhere('cpf','==',cpfFmt)));
+          if(!snap2.empty){
+            const d=snap2.docs[0].data();
+            if(((d.uid||d.cartao||'').toUpperCase())===uid) c={...d,_doc:snap2.docs[0].id,_col:'cadastros'};
+          }
+        }catch(e){}
+      }
+    }
+  }catch(e){}
+
+  // DEMO
+  if(!c && uid==='DEMO1234' && cpfRaw==='12345678901') c=demoCliente();
+
+  if(!c){
+    errEl.textContent='⚠ Cartão ou CPF não encontrado. Verifique os dados.'; errEl.style.display='block';
+    btn.disabled=false; btn.textContent='ACESSAR MEU CARTÃO'; return;
+  }
+  cliente=c; tipoCartao=c.tipo||tipoCartao;
+  parseLancamentos();
+  montarPortal();
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').style.display='block';
+  notif('✅ Bem-vindo, '+(c.nome||'').split(' ')[0]+'!','ok');
+  btn.disabled=false; btn.textContent='ACESSAR MEU CARTÃO';
+}
+
+function demoCliente(){
+  return {
+    nome:'CARLOS SILVA',cpf:'123.456.789-01',uid:'DEMO1234',num:'PRE-0042',
+    saldo:47.50,tipo:'prepago',cadastro:'15/01/2025',idade:34,
+    historico:[
+      '10/03/2025 22:30 — Consumo: -R$ 8,50 | Saldo: R$ 47,50',
+      '10/03/2025 20:15 — Consumo: -R$ 12,00 | Saldo: R$ 56,00',
+      '08/03/2025 19:00 — Recarga: +R$ 50,00 | Saldo: R$ 68,00',
+      '07/03/2025 23:10 — Consumo: -R$ 8,50 | Saldo: R$ 18,00',
+      '05/03/2025 21:45 — Consumo: -R$ 15,50 | Saldo: R$ 26,50',
+      '03/03/2025 20:30 — Recarga: +R$ 30,00 | Saldo: R$ 42,00',
+      '01/03/2025 22:00 — Consumo: -R$ 12,00 | Saldo: R$ 12,00',
+      '28/02/2025 19:30 — Consumo: -R$ 8,50 | Saldo: R$ 24,00',
+      '25/02/2025 21:00 — Recarga: +R$ 50,00 | Saldo: R$ 32,50',
+      '22/02/2025 20:15 — Consumo: -R$ 16,00 | Saldo: R$ -17,50',
+      '20/02/2025 22:45 — Consumo: -R$ 8,50 | Saldo: R$ 1,50',
+      '18/02/2025 19:00 — Recarga: +R$ 80,00 | Saldo: R$ 10,00',
+      '15/02/2025 21:30 — Consumo: -R$ 12,00 | Saldo: R$ -70,00',
+      '10/02/2025 20:00 — Consumo: -R$ 8,50 | Saldo: R$ -58,00',
+      '05/02/2025 18:30 — Recarga: +R$ 100,00 | Saldo: R$ -49,50',
+      '01/02/2025 23:00 — Consumo: -R$ 15,00 | Saldo: R$ -149,50',
+    ],
+    _col:'demo'
+  };
+}
+
+function doLogout(){
+  cliente=null; lancamentos=[];
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('inputCartao').value='';
+  document.getElementById('inputCpf').value='';
+  document.getElementById('loginError').style.display='none';
+}
+
+// ── PARSE HISTÓRICO ──
+function parseLancamentos(){
+  lancamentos=[];
+  const hist=cliente.historico||[];
+  for(const linha of hist){
+    const item=parseLinha(linha);
+    if(item) lancamentos.push(item);
+  }
+  lancamentos.sort((a,b)=>(b.data||0)-(a.data||0));
+}
+
+function parseLinha(linha){
+  if(!linha) return null;
+  const mData=linha.match(/(\d{2}\/\d{2}\/\d{4})/);
+  const mHora=linha.match(/(\d{2}:\d{2})/);
+  const mVal =linha.match(/R\$\s*([\d,\.]+)/);
+  const baixa=linha.toLowerCase();
+  let tipo='consumo';
+  if(baixa.includes('recarga')||baixa.includes('saldo inicial')) tipo='recarga';
+  else if(baixa.includes('devolução')||baixa.includes('devolucao')||baixa.includes('cancelou')||baixa.includes('cancelamento')) tipo='devolucao';
+  let data=null;
+  if(mData){
+    const [d,m,a]=mData[1].split('/');
+    const [h,min]=(mHora?mHora[1]:'00:00').split(':');
+    data=new Date(+a,+m-1,+d,+h,+min);
+  }
+  let valor=0;
+  if(mVal) valor=parseFloat(mVal[1].replace(',','.'));
+  let desc=tipo==='recarga'?'Recarga':tipo==='devolucao'?'Devolução/Cancelamento':'Consumo';
+  const mDesc=linha.match(/—\s*(.+?):/);
+  if(mDesc) desc=mDesc[1].trim();
+  return {tipo,valor,data,desc,raw:linha};
+}
+
+// ── MONTAR PORTAL ──
+function montarPortal(){
+  const c=cliente;
+  const saldo=parseFloat(c.saldo)||0;
+  document.getElementById('topbarNome').textContent=(c.nome||'').toUpperCase();
+  document.getElementById('heroSaldo').textContent=R(saldo);
+  document.getElementById('heroMeta').textContent=`Cartão: ${c.uid||'—'} · Nº ${c.num||'—'}`;
+  document.getElementById('heroBadge').textContent=tipoCartao==='mensal'?'📅 MENSAL':'💳 PRÉ-PAGO';
+  document.getElementById('heroUid').textContent=c.uid||'—';
+  if(saldo<10) document.getElementById('alertaRec').style.display='flex';
+
+  // Stats
+  const hoje=new Date(); hoje.setHours(0,0,0,0);
+  const inicioMes=new Date(hoje.getFullYear(),hoje.getMonth(),1);
+  const consMes=lancamentos.filter(l=>l.tipo==='consumo'&&l.data>=inicioMes);
+  const consHoje=lancamentos.filter(l=>l.tipo==='consumo'&&l.data>=hoje);
+  document.getElementById('statMes').textContent=R(consMes.reduce((s,l)=>s+l.valor,0));
+  document.getElementById('statMesNome').textContent=new Date().toLocaleString('pt-BR',{month:'long'});
+  document.getElementById('statHoje').textContent=consHoje.length;
+  const ult=lancamentos.find(l=>l.tipo==='consumo');
+  if(ult){document.getElementById('statUltVal').textContent=R(ult.valor);document.getElementById('statUltData').textContent=fmtDT(ult.data);}
+  document.getElementById('statSince').textContent=c.cadastro||'—';
+  document.getElementById('statIdade').textContent=c.idade?`${c.idade} anos`:'—';
+
+  // Recarga
+  document.getElementById('recSaldoAtual').textContent=R(saldo);
+
+  // Cartão visual
+  document.getElementById('cvNome').textContent=c.nome||'—';
+  document.getElementById('cvNum').textContent=c.num||'—';
+  document.getElementById('cvUid').textContent=c.uid||'—';
+  document.getElementById('cvSaldo').textContent=R(saldo);
+  document.getElementById('cvTipo').innerHTML=tipoCartao==='mensal'?'<span class="badge badge-blue">📅 MENSAL</span>':'<span class="badge badge-gold">💳 PRÉ-PAGO</span>';
+
+  // Dados
+  document.getElementById('dadoNome').textContent=c.nome||'—';
+  document.getElementById('dadoCpf').textContent=c.cpf||'—';
+  document.getElementById('dadoNum').textContent=c.num||'—';
+  document.getElementById('dadoTipo').innerHTML=tipoCartao==='mensal'?'<span class="badge badge-blue">MENSAL</span>':'<span class="badge badge-gold">PRÉ-PAGO</span>';
+  document.getElementById('dadoCad').textContent=c.cadastro||'—';
+
+  // Fatura
+  document.getElementById('fatNome').textContent=c.nome||'—';
+  document.getElementById('fatCpf').textContent=c.cpf||'—';
+  document.getElementById('fatCartao').textContent=`Cartão: ${c.uid||'—'} · Nº ${c.num||'—'}`;
+  document.getElementById('fatSubtitle').textContent=`${c.uid||'—'} · ${c.nome||'—'}`;
+
+  if(tipoCartao==='mensal'){document.getElementById('secMensal').style.display='block'; montarMensal();}
+  renderResumo(); renderRecargas(); renderFatura(); renderHistorico(); renderGrafico();
+}
+
+function montarMensal(){
+  const c=cliente;
+  document.getElementById('planNome').textContent=c.plano||'MENSAL ILIMITADO';
+  document.getElementById('planDesc').textContent=c.planDesc||'Acesso completo';
+  const hoje=new Date(); const dv=c.diaVencimento||10;
+  let venc=new Date(hoje.getFullYear(),hoje.getMonth(),dv);
+  if(venc<=hoje) venc=new Date(hoje.getFullYear(),hoje.getMonth()+1,dv);
+  const dias=Math.ceil((venc-hoje)/86400000);
+  document.getElementById('planVenc').textContent=venc.toLocaleDateString('pt-BR');
+  document.getElementById('planVencDias').textContent=`${dias} dias restantes`;
+  const atrasado=c.mensalidadeAtrasada||false;
+  document.getElementById('planStatus').innerHTML=atrasado?'<span class="badge badge-red">⚠ ATRASADO</span>':'<span class="badge badge-green">✅ EM DIA</span>';
+  document.getElementById('planStatusDesc').textContent=atrasado?'Regularize para continuar':'Pagamento em dia — obrigado!';
+}
+
+// ── RENDERIZAÇÕES ──
+function rowLanc(l){
+  const cr=l.tipo==='recarga'||l.tipo==='devolucao'?'var(--green)':'var(--red)';
+  const si=l.tipo==='recarga'||l.tipo==='devolucao'?'+':'-';
+  const bg=l.tipo==='recarga'?'<span class="badge badge-green">RECARGA</span>':l.tipo==='devolucao'?'<span class="badge badge-blue">DEVOLUÇÃO</span>':'<span class="badge badge-muted">CONSUMO</span>';
+  return `<tr><td>${fmtDT(l.data)}</td><td>${l.desc}</td><td>${bg}</td><td style="color:${cr};font-weight:600;text-align:right;">${si}${R(l.valor)}</td></tr>`;
+}
+
+function renderResumo(){
+  const el=document.getElementById('resumoTrans');
+  const u=lancamentos.slice(0,5);
+  if(!u.length){el.innerHTML='<div style="color:var(--muted);font-family:\'IBM Plex Mono\',monospace;font-size:12px;padding:16px 0;text-align:center;">Sem transações registradas.</div>';return;}
+  el.innerHTML='<table class="table"><thead><tr><th>Data/Hora</th><th>Descrição</th><th>Tipo</th><th style="text-align:right;">Valor</th></tr></thead><tbody>'+u.map(l=>rowLanc(l)).join('')+'</tbody></table>';
+}
+
+function renderRecargas(){
+  const el=document.getElementById('listaRecargas');
+  const r=lancamentos.filter(l=>l.tipo==='recarga');
+  if(!r.length){el.innerHTML='<div style="color:var(--muted);font-family:\'IBM Plex Mono\',monospace;font-size:12px;padding:16px 0;text-align:center;">Nenhuma recarga registrada.</div>';return;}
+  el.innerHTML='<table class="table"><thead><tr><th>Data</th><th>Descrição</th><th style="text-align:right;">Valor</th><th>Status</th></tr></thead><tbody>'+
+    r.slice(0,20).map(l=>`<tr><td>${fmtDT(l.data)}</td><td>${l.desc}</td><td style="color:var(--green);font-weight:600;text-align:right;">+${R(l.valor)}</td><td><span class="badge badge-green">✅ OK</span></td></tr>`).join('')+
+    '</tbody></table>';
+}
+
+function renderFatura(){
+  const off=parseInt(document.getElementById('fatFiltroMes').value)||0;
+  const ref=new Date(); ref.setDate(1); ref.setHours(0,0,0,0); ref.setMonth(ref.getMonth()-off);
+  const fim=new Date(ref.getFullYear(),ref.getMonth()+1,0,23,59,59);
+  document.getElementById('fatPeriodo').textContent=`${fmtD(ref)} a ${fmtD(fim)}`;
+  const cons=lancamentos.filter(l=>l.tipo==='consumo'&&l.data>=ref&&l.data<=fim);
+  const recs=lancamentos.filter(l=>l.tipo==='recarga'&&l.data>=ref&&l.data<=fim);
+  const totC=cons.reduce((s,l)=>s+l.valor,0);
+  const totR=recs.reduce((s,l)=>s+l.valor,0);
+  document.getElementById('fatTotal').textContent=R(totC);
+  document.getElementById('fatQtd').textContent=`${cons.length} consumo${cons.length!==1?'s':''}`;
+  document.getElementById('fatRec').textContent=R(totR);
+  document.getElementById('fatRecQtd').textContent=`${recs.length} recarga${recs.length!==1?'s':''}`;
+  document.getElementById('fatPctLbl').textContent=`${R(totC)} consumido`;
+  document.getElementById('fatProg').style.width=Math.min(100,(totC/Math.max(totR,totC,1))*100)+'%';
+  const todos=[...cons,...recs].sort((a,b)=>(b.data||0)-(a.data||0));
+  const el=document.getElementById('fatTabela');
+  if(!todos.length){el.innerHTML='<div style="color:var(--muted);font-family:\'IBM Plex Mono\',monospace;font-size:12px;padding:16px 0;text-align:center;">Nenhum lançamento no período.</div>';return;}
+  const saldoPer=totR-totC;
+  el.innerHTML=`<table class="table"><thead><tr><th>Data/Hora</th><th>Descrição</th><th>Tipo</th><th style="text-align:right;">Valor</th></tr></thead><tbody>`+
+    todos.map(l=>`<tr><td>${fmtDT(l.data)}</td><td>${l.desc}</td><td>${l.tipo==='recarga'?'<span class="badge badge-green">CRÉDITO</span>':l.tipo==='devolucao'?'<span class="badge badge-blue">DEVOLUÇÃO</span>':'<span class="badge badge-muted">DÉBITO</span>'}</td><td style="text-align:right;color:${l.tipo==='recarga'||l.tipo==='devolucao'?'var(--green)':'var(--red)'};font-weight:600;">${l.tipo==='recarga'||l.tipo==='devolucao'?'+':'-'}${R(l.valor)}</td></tr>`).join('')+
+    `</tbody><tfoot><tr style="border-top:1px solid var(--border);">
+      <td colspan="3" style="padding:12px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;">SALDO DO PERÍODO</td>
+      <td style="padding:12px;text-align:right;font-family:'Bebas Neue',sans-serif;font-size:20px;color:${saldoPer>=0?'var(--green)':'var(--red)'};">${saldoPer>=0?'+':''}${R(saldoPer)}</td>
+    </tr></tfoot></table>`;
+}
+
+function renderHistorico(){
+  const filtro=document.getElementById('histFiltro').value;
+  let lista=filtro==='todos'?lancamentos:lancamentos.filter(l=>l.tipo===filtro);
+  const cons=lancamentos.filter(l=>l.tipo==='consumo');
+  const recs=lancamentos.filter(l=>l.tipo==='recarga');
+  const totC=cons.reduce((s,l)=>s+l.valor,0);
+  const totR=recs.reduce((s,l)=>s+l.valor,0);
+  document.getElementById('hTotCons').textContent=R(totC);
+  document.getElementById('hTotRec').textContent=R(totR);
+  document.getElementById('hQtd').textContent=cons.length;
+  document.getElementById('hTicket').textContent=cons.length?R(totC/cons.length):'—';
+  const el=document.getElementById('histTabela');
+  if(!lista.length){el.innerHTML='<div style="color:var(--muted);font-family:\'IBM Plex Mono\',monospace;font-size:12px;padding:16px 0;text-align:center;">Nenhum lançamento.</div>';return;}
+  el.innerHTML='<table class="table"><thead><tr><th>Data/Hora</th><th>Descrição</th><th>Tipo</th><th style="text-align:right;">Valor</th></tr></thead><tbody>'+lista.map(l=>rowLanc(l)).join('')+'</tbody></table>';
+}
+
+function renderGrafico(){
+  const el=document.getElementById('grafico');
+  const lb=document.getElementById('graficoLabels');
+  if(!el) return;
+  const agora=new Date(); const meses=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date(agora.getFullYear(),agora.getMonth()-i,1);
+    const fim=new Date(d.getFullYear(),d.getMonth()+1,0,23,59,59);
+    const tot=lancamentos.filter(l=>l.tipo==='consumo'&&l.data>=d&&l.data<=fim).reduce((s,l)=>s+l.valor,0);
+    meses.push({label:d.toLocaleString('pt-BR',{month:'short'}),valor:tot});
+  }
+  const maxV=Math.max(...meses.map(m=>m.valor),1);
+  el.innerHTML=meses.map(m=>{
+    const pct=(m.valor/maxV)*100;
+    return `<div style="flex:1;background:${pct>0?'rgba(212,160,23,0.25)':'rgba(255,255,255,0.04)'};height:${Math.max(pct,4)}%;border-top:2px solid ${pct>0?'var(--gold)':'transparent'};position:relative;" title="${R(m.valor)}">
+      ${pct>50?`<div style="position:absolute;top:-16px;width:100%;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--gold);">${R(m.valor).replace('R$ ','')}</div>`:''}
+    </div>`;
+  }).join('');
+  lb.innerHTML=meses.map(m=>`<div style="flex:1;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;">${m.label}</div>`).join('');
+}
+
+// ── RECARGA ──
+function setRec(v){document.getElementById('recValor').value=v;}
+
+function abrirRecarga(){
+  const val=parseFloat(document.getElementById('recValor').value);
+  const metodo=document.getElementById('recMetodo').value;
+  const msg=document.getElementById('recMsg');
+  msg.style.display='none';
+  if(!val||val<1){
+    msg.style.color='var(--red)';msg.style.borderColor='rgba(232,64,64,0.3)';msg.textContent='⚠ Informe um valor válido (mínimo R$ 1,00).';msg.style.display='block';return;
+  }
+  if(metodo==='pix'){
+    document.getElementById('pixValor').textContent=R(val);
+    gerarQR(val);
+    document.getElementById('modalPix').classList.add('active');
+  } else if(metodo==='dinheiro'){
+    msg.style.color='var(--blue)';msg.style.borderColor='rgba(61,156,240,0.3)';msg.textContent='ℹ️ Para recarga em dinheiro, procure o atendente com seu cartão President.';msg.style.display='block';
+  } else {
+    msg.style.color='var(--orange)';msg.style.borderColor='rgba(240,122,32,0.3)';msg.textContent='⚠ Pagamento no cartão de crédito: entre em contato com o suporte para ativar.';msg.style.display='block';
+  }
+}
+
+function gerarQR(valor){
+  const canvas=document.getElementById('qrCanvas');
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,148,148);
+  ctx.fillStyle='#000';
+  const seed=('pix'+valor).split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  const rand=(r,c)=>((seed*(r*41+c*17)+r*13+c*7)%100)>44;
+  const sz=4,cols=37;
+  [[0,0],[0,cols-7],[cols-7,0]].forEach(([ry,rx])=>{
+    ctx.fillStyle='#000';ctx.fillRect(rx*sz,ry*sz,7*sz,7*sz);
+    ctx.fillStyle='#fff';ctx.fillRect((rx+1)*sz,(ry+1)*sz,5*sz,5*sz);
+    ctx.fillStyle='#000';ctx.fillRect((rx+2)*sz,(ry+2)*sz,3*sz,3*sz);
+  });
+  for(let r=0;r<cols;r++) for(let c=0;c<cols;c++){
+    if((r<8&&c<8)||(r<8&&c>cols-9)||(r>cols-9&&c<8)) continue;
+    if(rand(r,c)){ctx.fillStyle='#000';ctx.fillRect(c*sz,r*sz,sz,sz);}
+  }
+}
+
+function fecharPix(){document.getElementById('modalPix').classList.remove('active');}
+function copiarPix(){
+  navigator.clipboard.writeText(document.getElementById('pixChave').textContent)
+    .then(()=>notif('✅ Chave PIX copiada!','ok')).catch(()=>notif('Copie manualmente','info'));
+}
+
+async function confirmarPagto(){
+  fecharPix();
+  const val=parseFloat(document.getElementById('recValor').value)||0;
+  if(!val) return;
+  if(window._pdb && cliente._col!=='demo'){
+    try{
+      const ref=window._pdoc(window._pcol(window._pdb,'recargas_pendentes'),`${cliente.uid}_${Date.now()}`);
+      await window._pset(ref,{uid:cliente.uid,nome:cliente.nome,cpf:cliente.cpf,valor:val,metodo:'pix',status:'aguardando_confirmacao',ts:new Date().toISOString()});
+    }catch(e){}
+  }
+  notif('⏳ Solicitação de '+R(val)+' enviada! Aguarde o operador confirmar.','info');
+  const msg=document.getElementById('recMsg');
+  msg.style.color='var(--orange)';msg.style.borderColor='rgba(240,122,32,0.3)';
+  msg.textContent=`⏳ Recarga de ${R(val)} solicitada via PIX. O operador irá confirmar em breve.`;
+  msg.style.display='block';
+  document.getElementById('recValor').value='';
+}
+
+// ── EXPORTAR PDF ──
+function exportarPDF(){
+  if(!cliente){notif('Faça login primeiro.','err');return;}
+  const c=cliente;
+  const saldo=parseFloat(c.saldo)||0;
+  const agora=new Date().toLocaleString('pt-BR');
+  const cons=lancamentos.filter(l=>l.tipo==='consumo');
+  const recs=lancamentos.filter(l=>l.tipo==='recarga');
+  const totC=cons.reduce((s,l)=>s+l.valor,0);
+  const totR=recs.reduce((s,l)=>s+l.valor,0);
+  const hoje=new Date(); hoje.setHours(0,0,0,0);
+  const iM=new Date(hoje.getFullYear(),hoje.getMonth(),1);
+  const totMes=lancamentos.filter(l=>l.tipo==='consumo'&&l.data>=iM).reduce((s,l)=>s+l.valor,0);
+
+  const linhas=lancamentos.slice(0,50).map(l=>`
+    <tr>
+      <td style="padding:7px 10px;border-bottom:1px solid #eee;font-size:11px;">${fmtDT(l.data)}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid #eee;font-size:11px;">${l.desc}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid #eee;font-size:11px;text-transform:uppercase;">${l.tipo}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid #eee;font-size:11px;text-align:right;color:${l.tipo==='recarga'||l.tipo==='devolucao'?'#16a34a':'#dc2626'};font-weight:600;">${l.tipo==='recarga'||l.tipo==='devolucao'?'+':'-'}${R(l.valor)}</td>
+    </tr>`).join('');
+
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Extrato PRESIDENT 24H — ${c.nome}</title>
+  <style>body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:#222;margin:32px;}
+  .header{display:flex;align-items:flex-start;justify-content:space-between;border-bottom:3px solid #d4a017;padding-bottom:16px;margin-bottom:24px;}
+  .logo{font-size:30px;font-weight:900;letter-spacing:4px;color:#d4a017;}
+  h2{font-size:13px;font-weight:700;letter-spacing:2px;color:#333;text-transform:uppercase;margin:20px 0 10px;border-left:4px solid #d4a017;padding-left:8px;}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+  .sb{background:#f9f8f5;border:1px solid #e8e0cc;padding:12px 14px;}
+  .sl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:3px;}
+  .sv{font-size:20px;font-weight:900;color:#b8860b;}
+  table{width:100%;border-collapse:collapse;}
+  thead tr{background:#f5f0e5;}
+  th{padding:8px 10px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#666;text-align:left;border-bottom:2px solid #d4a017;}
+  .footer{margin-top:28px;padding-top:12px;border-top:1px solid #ddd;font-size:10px;color:#aaa;text-align:center;}
+  </style></head><body>
+  <div class="header">
+    <div><div class="logo">🍺 PRESIDENT 24H</div><div style="font-size:10px;letter-spacing:2px;color:#888;">EXTRATO DO CLIENTE · ${agora}</div></div>
+    <div style="text-align:right;">
+      <div style="background:${tipoCartao==='mensal'?'#d1ecf1':'#fef3cd'};color:${tipoCartao==='mensal'?'#0c5460':'#856404'};padding:3px 12px;font-size:11px;font-weight:700;display:inline-block;">${tipoCartao==='mensal'?'MENSAL':'PRÉ-PAGO'}</div>
+      <div style="font-size:10px;color:#888;margin-top:4px;">Nº ${c.num||'—'}</div>
+    </div>
+  </div>
+  <h2>Dados do Cliente</h2>
+  <table style="width:auto;margin-bottom:20px;">
+    <tr><td style="padding:6px 20px 6px 0;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;">Nome</td><td style="padding:6px 0;font-weight:600;">${c.nome||'—'}</td></tr>
+    <tr><td style="padding:6px 20px 6px 0;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;">CPF</td><td style="padding:6px 0;">${c.cpf||'—'}</td></tr>
+    <tr><td style="padding:6px 20px 6px 0;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Cartão (UID)</td><td style="padding:6px 0;font-family:monospace;">${c.uid||'—'}</td></tr>
+    <tr><td style="padding:6px 20px 6px 0;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Cadastro</td><td style="padding:6px 0;">${c.cadastro||'—'}</td></tr>
+    <tr><td style="padding:6px 20px 6px 0;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Tipo</td><td style="padding:6px 0;font-weight:700;">${tipoCartao==='mensal'?'MENSAL':'PRÉ-PAGO'}</td></tr>
+  </table>
+  <h2>Resumo Financeiro</h2>
+  <div class="grid">
+    <div class="sb"><div class="sl">Saldo atual</div><div class="sv" style="color:#16a34a;">${R(saldo)}</div></div>
+    <div class="sb"><div class="sl">Gasto este mês</div><div class="sv">${R(totMes)}</div></div>
+    <div class="sb"><div class="sl">Total recargas</div><div class="sv" style="color:#16a34a;">${R(totR)}</div></div>
+    <div class="sb"><div class="sl">Total consumido</div><div class="sv" style="color:#dc2626;">${R(totC)}</div></div>
+  </div>
+  <h2>Histórico de Lançamentos</h2>
+  <table><thead><tr><th>Data/Hora</th><th>Descrição</th><th>Tipo</th><th style="text-align:right;">Valor</th></tr></thead>
+  <tbody>${linhas||'<tr><td colspan="4" style="padding:16px;color:#aaa;text-align:center;">Nenhum lançamento.</td></tr>'}</tbody></table>
+  <div class="footer">PRESIDENT 24H · Extrato gerado em ${agora} · Documento não tem valor fiscal</div>
+  <script>window.onload=function(){window.print();}<\/script></body></html>`;
+
+  const w=window.open('','_blank','width=900,height=650');
+  if(w){w.document.write(html);w.document.close();}
+  else notif('Permita pop-ups para gerar PDF.','info');
+}
+
+// ── ENTER no login ──
+['inputCartao','inputCpf'].forEach(id=>{
+  document.getElementById(id).addEventListener('keydown',e=>{
+    if(e.key==='Enter') id==='inputCartao'?document.getElementById('inputCpf').focus():doLogin();
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1875 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>PRESIDENT 24H — App Cliente</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Share+Tech+Mono&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold:    #c8a020;
+  --gold2:   #f0cc55;
+  --gold3:   #7a5c0a;
+  --green:   #18e070;
+  --green2:  #0a8040;
+  --red:     #e83030;
+  --bg:      #06080a;
+  --bg2:     #0d1018;
+  --bg3:     #141820;
+  --panel:   #181e28;
+  --panel2:  #1e2535;
+  --border:  #ffffff12;
+  --border2: #c8a02030;
+  --text:    #e8e8e8;
+  --muted:   #6a7080;
+  --radius:  18px;
+  --radius2: 12px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  font-family:'Barlow Condensed',sans-serif;
+  background:#000;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  min-height:100vh;
+  padding:20px;
+  gap:20px;
+  flex-wrap:wrap;
+}
+
+/* ── PHONE SHELL ── */
+.phone {
+  width:390px;
+  min-height:844px;
+  background:var(--bg);
+  border-radius:44px;
+  border:1px solid #ffffff18;
+  overflow:hidden;
+  position:relative;
+  flex-shrink:0;
+  box-shadow:0 40px 100px rgba(0,0,0,.9), 0 0 0 1px #ffffff08, inset 0 1px 0 #ffffff15;
+}
+
+/* Notch */
+.phone::before {
+  content:'';
+  position:absolute;
+  top:0; left:50%;
+  transform:translateX(-50%);
+  width:126px; height:34px;
+  background:#000;
+  border-radius:0 0 20px 20px;
+  z-index:100;
+}
+
+.screen {
+  display:none;
+  flex-direction:column;
+  height:844px;
+  overflow:hidden;
+  position:relative;
+}
+.screen.active { display:flex; }
+
+/* ── STATUS BAR ── */
+.statusbar {
+  height:44px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  padding:0 24px 6px;
+  font-family:'Share Tech Mono',monospace;
+  font-size:11px;
+  color:#ffffff80;
+  flex-shrink:0;
+  position:relative;
+  z-index:10;
+}
+
+/* ── SCROLLABLE CONTENT ── */
+.scroll {
+  flex:1;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+}
+.scroll::-webkit-scrollbar { display:none; }
+
+/* ── BOTTOM NAV ── */
+.bottomnav {
+  height:80px;
+  background:rgba(13,16,24,0.95);
+  backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:space-around;
+  padding:0 8px 12px;
+  flex-shrink:0;
+}
+.nav-btn {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  cursor:pointer;
+  padding:8px 12px;
+  border-radius:12px;
+  transition:all .2s;
+  border:none;
+  background:none;
+}
+.nav-btn.active .nav-icon { color:var(--gold); }
+.nav-btn.active .nav-label { color:var(--gold); }
+.nav-icon { font-size:20px; transition:transform .2s; }
+.nav-label { font-size:10px; letter-spacing:1px; color:var(--muted); font-family:'Barlow Condensed',sans-serif; text-transform:uppercase; }
+
+/* ── TYPOGRAPHY ── */
+.title-xl {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:2.4rem;
+  letter-spacing:4px;
+  color:var(--gold);
+  line-height:1;
+}
+.title-lg {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.8rem;
+  letter-spacing:3px;
+  color:var(--text);
+}
+.label {
+  font-size:10px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--muted);
+  font-family:'Share Tech Mono',monospace;
+}
+
+/* ── CARDS ── */
+.card {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:var(--radius2);
+  padding:16px;
+}
+.card-gold {
+  background:linear-gradient(135deg,#1a1400,#0d0a00);
+  border:1px solid var(--border2);
+}
+
+/* ── BUTTONS ── */
+.btn-primary {
+  width:100%;
+  padding:16px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#000;
+  border:none;
+  border-radius:14px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.1rem;
+  letter-spacing:3px;
+  cursor:pointer;
+  transition:all .2s;
+  box-shadow:0 4px 20px rgba(200,160,32,.3);
+}
+.btn-primary:active { transform:scale(.97); }
+.btn-outline {
+  width:100%;
+  padding:14px;
+  background:transparent;
+  color:var(--gold);
+  border:1px solid var(--border2);
+  border-radius:14px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1rem;
+  letter-spacing:3px;
+  cursor:pointer;
+  transition:all .2s;
+}
+.btn-green {
+  background:linear-gradient(135deg,var(--green2),var(--green));
+  color:#000;
+  border:none;
+  border-radius:14px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1rem;
+  letter-spacing:3px;
+  cursor:pointer;
+  padding:14px;
+  width:100%;
+}
+
+/* ── INPUT ── */
+.inp {
+  width:100%;
+  background:var(--panel2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px 16px;
+  color:var(--text);
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:1rem;
+  outline:none;
+}
+.inp:focus { border-color:var(--border2); }
+.inp::placeholder { color:var(--muted); }
+
+/* ── BADGE ── */
+.badge {
+  display:inline-flex;
+  align-items:center;
+  padding:3px 10px;
+  border-radius:20px;
+  font-size:10px;
+  letter-spacing:1px;
+  font-family:'Share Tech Mono',monospace;
+}
+.badge-gold { background:rgba(200,160,32,.15); color:var(--gold); border:1px solid rgba(200,160,32,.3); }
+.badge-green { background:rgba(24,224,112,.12); color:var(--green); border:1px solid rgba(24,224,112,.25); }
+.badge-red { background:rgba(232,48,48,.12); color:var(--red); border:1px solid rgba(232,48,48,.25); }
+
+/* ── GRADIENT MESH BG ── */
+.mesh-bg {
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+}
+.mesh-bg::before {
+  content:'';
+  position:absolute;
+  top:-40%; left:-20%;
+  width:80%; height:80%;
+  background:radial-gradient(ellipse,rgba(200,160,32,.08) 0%,transparent 70%);
+}
+.mesh-bg::after {
+  content:'';
+  position:absolute;
+  bottom:-20%; right:-20%;
+  width:60%; height:60%;
+  background:radial-gradient(ellipse,rgba(24,224,112,.05) 0%,transparent 70%);
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)} }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.5} }
+@keyframes shimmer { 0%{background-position:-200% 0}100%{background-position:200% 0} }
+@keyframes spin { to{transform:rotate(360deg)} }
+@keyframes glow { 0%,100%{box-shadow:0 0 20px rgba(200,160,32,.3)}50%{box-shadow:0 0 40px rgba(200,160,32,.6)} }
+@keyframes slideIn { from{transform:translateX(100%)}to{transform:translateX(0)} }
+@keyframes scaleIn { from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)} }
+
+.anim-fadeup { animation:fadeUp .5s ease forwards; }
+.anim-fadein { animation:fadeUp .4s ease forwards; }
+
+/* ══════════════════════════════════════════
+   SCREEN 1 — SPLASH
+══════════════════════════════════════════ */
+#s-splash {
+  background:radial-gradient(ellipse at 30% 40%,#1a1200 0%,#06080a 60%);
+  justify-content:center;
+  align-items:center;
+}
+.splash-logo {
+  text-align:center;
+  animation:scaleIn .6s cubic-bezier(.175,.885,.32,1.275) both;
+}
+.splash-icon {
+  font-size:5rem;
+  margin-bottom:16px;
+  filter:drop-shadow(0 0 30px rgba(200,160,32,.5));
+  animation:glow 3s ease-in-out infinite;
+  display:block;
+}
+.splash-name {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:3.5rem;
+  letter-spacing:8px;
+  color:var(--gold);
+  line-height:1;
+}
+.splash-sub {
+  font-size:11px;
+  letter-spacing:5px;
+  color:var(--muted);
+  font-family:'Share Tech Mono',monospace;
+  margin-top:6px;
+}
+.splash-line {
+  width:60px; height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  margin:20px auto;
+}
+.splash-loading {
+  display:flex;
+  gap:8px;
+  justify-content:center;
+  margin-top:40px;
+}
+.dot {
+  width:6px; height:6px;
+  border-radius:50%;
+  background:var(--gold3);
+  animation:pulse 1.2s ease-in-out infinite;
+}
+.dot:nth-child(2) { animation-delay:.2s; }
+.dot:nth-child(3) { animation-delay:.4s; }
+
+/* ══════════════════════════════════════════
+   SCREEN 2 — VERIFICAÇÃO DE IDADE
+══════════════════════════════════════════ */
+#s-idade {
+  background:radial-gradient(ellipse at 50% 30%,#1a0808 0%,#06080a 60%);
+}
+.idade-hero {
+  padding:60px 28px 28px;
+  text-align:center;
+}
+.idade-icon {
+  font-size:4rem;
+  display:block;
+  margin-bottom:20px;
+  animation:scaleIn .5s cubic-bezier(.175,.885,.32,1.275) both;
+}
+.idade-title {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:2rem;
+  letter-spacing:4px;
+  color:var(--text);
+  margin-bottom:8px;
+}
+.idade-desc {
+  font-size:13px;
+  color:var(--muted);
+  line-height:1.6;
+  max-width:280px;
+  margin:0 auto;
+}
+.idade-body { padding:0 24px 24px; display:flex; flex-direction:column; gap:14px; }
+.idade-law {
+  background:rgba(232,48,48,.06);
+  border:1px solid rgba(232,48,48,.2);
+  border-radius:12px;
+  padding:14px;
+  font-size:11px;
+  color:#ff666680;
+  font-family:'Share Tech Mono',monospace;
+  letter-spacing:.5px;
+  line-height:1.7;
+  text-align:center;
+}
+.btn-idade-sim {
+  background:linear-gradient(135deg,#c8a020,#f0cc55);
+  color:#000;
+  border:none;
+  border-radius:14px;
+  padding:18px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.3rem;
+  letter-spacing:4px;
+  cursor:pointer;
+  box-shadow:0 4px 20px rgba(200,160,32,.3);
+}
+.btn-idade-nao {
+  background:transparent;
+  color:var(--muted);
+  border:1px solid #ffffff15;
+  border-radius:14px;
+  padding:14px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1rem;
+  letter-spacing:3px;
+  cursor:pointer;
+}
+
+/* ══════════════════════════════════════════
+   SCREEN 3 — LOGIN / CADASTRO
+══════════════════════════════════════════ */
+#s-login {
+  background:var(--bg);
+}
+.login-header {
+  padding:60px 28px 28px;
+  text-align:center;
+}
+.login-logo { font-size:2.5rem; display:block; margin-bottom:12px; }
+.login-title {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.6rem;
+  letter-spacing:4px;
+  color:var(--gold);
+}
+.login-sub { font-size:12px; color:var(--muted); letter-spacing:2px; margin-top:4px; }
+.login-body { padding:0 24px 24px; display:flex; flex-direction:column; gap:14px; }
+.tab-switch {
+  display:flex;
+  background:var(--panel);
+  border-radius:12px;
+  padding:4px;
+  gap:4px;
+}
+.tab-btn {
+  flex:1;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:transparent;
+  color:var(--muted);
+  font-family:'Bebas Neue',sans-serif;
+  font-size:.9rem;
+  letter-spacing:2px;
+  cursor:pointer;
+  transition:all .2s;
+}
+.tab-btn.active {
+  background:var(--panel2);
+  color:var(--gold);
+  border:1px solid var(--border2);
+}
+.form-group { display:flex; flex-direction:column; gap:8px; }
+.form-label { font-size:10px; letter-spacing:2px; color:var(--muted); font-family:'Share Tech Mono',monospace; }
+.divider {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  color:var(--muted);
+  font-size:11px;
+  letter-spacing:2px;
+}
+.divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--border); }
+.social-btn {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:13px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  color:var(--text);
+  font-size:.85rem;
+  letter-spacing:1px;
+  cursor:pointer;
+}
+
+/* ══════════════════════════════════════════
+   SCREEN 4 — HOME
+══════════════════════════════════════════ */
+#s-home {
+  background:var(--bg);
+}
+.home-header {
+  padding:52px 24px 20px;
+  position:relative;
+}
+.home-greeting { font-size:12px; color:var(--muted); letter-spacing:2px; }
+.home-name {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:2rem;
+  letter-spacing:3px;
+  color:var(--text);
+  margin-top:2px;
+}
+.notif-bell {
+  position:absolute;
+  right:24px; top:56px;
+  width:40px; height:40px;
+  border-radius:12px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+}
+.notif-dot {
+  position:absolute;
+  top:8px; right:8px;
+  width:8px; height:8px;
+  border-radius:50%;
+  background:var(--red);
+  border:2px solid var(--bg);
+}
+
+/* Saldo card */
+.saldo-card {
+  margin:0 24px 20px;
+  background:linear-gradient(135deg,#1a1400 0%,#0d1018 50%,#0a0e00 100%);
+  border:1px solid rgba(200,160,32,.3);
+  border-radius:20px;
+  padding:24px;
+  position:relative;
+  overflow:hidden;
+  animation:fadeUp .5s ease both;
+}
+.saldo-card::before {
+  content:'';
+  position:absolute;
+  top:-30px; right:-30px;
+  width:120px; height:120px;
+  background:radial-gradient(circle,rgba(200,160,32,.12),transparent);
+}
+.saldo-card::after {
+  content:'PRESIDENT';
+  position:absolute;
+  bottom:12px; right:16px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:.8rem;
+  letter-spacing:4px;
+  color:rgba(200,160,32,.15);
+}
+.saldo-label { font-size:10px; letter-spacing:3px; color:var(--gold3); font-family:'Share Tech Mono',monospace; }
+.saldo-valor {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:3rem;
+  letter-spacing:2px;
+  color:var(--gold);
+  line-height:1;
+  margin:6px 0;
+}
+.saldo-cartao { font-size:11px; color:var(--muted); font-family:'Share Tech Mono',monospace; letter-spacing:3px; }
+.saldo-actions { display:flex; gap:10px; margin-top:18px; }
+.saldo-btn {
+  flex:1;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  cursor:pointer;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:.85rem;
+  letter-spacing:2px;
+  transition:all .2s;
+}
+.saldo-btn-add { background:var(--gold); color:#000; }
+.saldo-btn-hist { background:rgba(255,255,255,.06); color:var(--text); border:1px solid var(--border); }
+
+/* Quick actions */
+.quick-title { padding:0 24px 12px; font-size:11px; letter-spacing:3px; color:var(--muted); font-family:'Share Tech Mono',monospace; }
+.quick-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; padding:0 24px 20px; }
+.quick-item {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  cursor:pointer;
+}
+.quick-icon {
+  width:56px; height:56px;
+  border-radius:16px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  transition:all .2s;
+}
+.quick-icon:active { transform:scale(.92); background:var(--panel2); }
+.quick-label { font-size:10px; color:var(--muted); letter-spacing:.5px; text-align:center; }
+
+/* Promo banner */
+.promo {
+  margin:0 24px 20px;
+  background:linear-gradient(135deg,#001a0a,#002010);
+  border:1px solid rgba(24,224,112,.2);
+  border-radius:16px;
+  padding:18px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+.promo-icon { font-size:2.5rem; flex-shrink:0; }
+.promo-title { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:2px; color:var(--green); }
+.promo-desc { font-size:12px; color:var(--muted); margin-top:2px; }
+
+/* Histórico recente */
+.hist-title { padding:0 24px 12px; display:flex; justify-content:space-between; align-items:center; }
+.hist-ver { font-size:11px; color:var(--gold); letter-spacing:1px; cursor:pointer; }
+.hist-item {
+  margin:0 24px 10px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.hist-emoji { font-size:1.5rem; width:40px; text-align:center; }
+.hist-info { flex:1; }
+.hist-nome { font-weight:600; font-size:.9rem; color:var(--text); }
+.hist-data { font-size:11px; color:var(--muted); margin-top:2px; }
+.hist-valor { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; }
+.hist-valor.neg { color:var(--red); }
+.hist-valor.pos { color:var(--green); }
+
+/* ══════════════════════════════════════════
+   SCREEN 5 — RECARGA PIX
+══════════════════════════════════════════ */
+#s-recarga { background:var(--bg); }
+.page-header {
+  padding:52px 24px 20px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+.back-btn {
+  width:40px; height:40px;
+  border-radius:12px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  cursor:pointer;
+  flex-shrink:0;
+}
+.page-title {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.6rem;
+  letter-spacing:3px;
+  color:var(--text);
+}
+.recarga-body { padding:0 24px 24px; display:flex; flex-direction:column; gap:16px; }
+.valor-display {
+  text-align:center;
+  padding:28px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:18px;
+}
+.valor-atual {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:3.5rem;
+  color:var(--gold);
+  letter-spacing:2px;
+}
+.valores-rapidos { display:flex; gap:8px; }
+.val-btn {
+  flex:1;
+  padding:12px 8px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  color:var(--text);
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1rem;
+  letter-spacing:1px;
+  cursor:pointer;
+  transition:all .2s;
+  text-align:center;
+}
+.val-btn.sel { background:rgba(200,160,32,.15); border-color:var(--border2); color:var(--gold); }
+.pix-info {
+  background:rgba(24,224,112,.06);
+  border:1px solid rgba(24,224,112,.2);
+  border-radius:14px;
+  padding:16px;
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+}
+.pix-icon { font-size:1.5rem; flex-shrink:0; }
+.pix-text { font-size:12px; color:var(--muted); line-height:1.6; }
+
+/* ══════════════════════════════════════════
+   SCREEN 6 — HISTÓRICO
+══════════════════════════════════════════ */
+#s-historico { background:var(--bg); }
+.hist-filter {
+  display:flex;
+  gap:8px;
+  padding:0 24px 16px;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+.filter-chip {
+  padding:8px 16px;
+  border-radius:20px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  color:var(--muted);
+  font-size:11px;
+  letter-spacing:1px;
+  white-space:nowrap;
+  cursor:pointer;
+  flex-shrink:0;
+  font-family:'Share Tech Mono',monospace;
+}
+.filter-chip.active { background:rgba(200,160,32,.12); border-color:var(--border2); color:var(--gold); }
+.hist-section { padding:0 24px; margin-bottom:20px; }
+.hist-section-title {
+  font-size:10px;
+  letter-spacing:3px;
+  color:var(--muted);
+  font-family:'Share Tech Mono',monospace;
+  margin-bottom:10px;
+}
+.hist-row {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-bottom:8px;
+}
+.hist-row-icon {
+  width:44px; height:44px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.3rem;
+  flex-shrink:0;
+}
+.icon-venda { background:rgba(200,160,32,.1); }
+.icon-recarga { background:rgba(24,224,112,.1); }
+.icon-reemb { background:rgba(232,48,48,.1); }
+.hist-row-info { flex:1; }
+.hist-row-title { font-size:.9rem; font-weight:600; color:var(--text); }
+.hist-row-sub { font-size:11px; color:var(--muted); margin-top:2px; font-family:'Share Tech Mono',monospace; }
+.hist-row-right { text-align:right; }
+.hist-row-val { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; }
+.hist-row-code { font-size:9px; color:var(--muted); font-family:'Share Tech Mono',monospace; margin-top:2px; }
+
+/* ══════════════════════════════════════════
+   SCREEN 7 — MÁQUINAS
+══════════════════════════════════════════ */
+#s-maquinas { background:var(--bg); }
+.map-placeholder {
+  margin:0 24px 16px;
+  height:200px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:8px;
+  position:relative;
+  overflow:hidden;
+}
+.map-grid {
+  position:absolute;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(200,160,32,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(200,160,32,.05) 1px,transparent 1px);
+  background-size:30px 30px;
+}
+.map-pin { font-size:2.5rem; position:relative; z-index:1; filter:drop-shadow(0 0 10px rgba(200,160,32,.5)); }
+.map-label { font-size:11px; color:var(--muted); letter-spacing:2px; position:relative; z-index:1; }
+.maq-item {
+  margin:0 24px 10px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:16px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.maq-icon {
+  width:50px; height:50px;
+  border-radius:14px;
+  background:rgba(200,160,32,.1);
+  border:1px solid var(--border2);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.5rem;
+  flex-shrink:0;
+}
+.maq-info { flex:1; }
+.maq-nome { font-weight:700; font-size:.95rem; color:var(--text); }
+.maq-end { font-size:11px; color:var(--muted); margin-top:2px; }
+.maq-dist { font-size:11px; color:var(--gold); font-family:'Share Tech Mono',monospace; }
+.maq-status { display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
+
+/* ══════════════════════════════════════════
+   SCREEN 8 — PERFIL / CARTÃO
+══════════════════════════════════════════ */
+#s-perfil { background:var(--bg); }
+.perfil-header {
+  padding:52px 24px 24px;
+  text-align:center;
+}
+.perfil-avatar {
+  width:80px; height:80px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--gold3),var(--gold));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:2rem;
+  margin:0 auto 12px;
+  border:3px solid var(--border2);
+  box-shadow:0 0 30px rgba(200,160,32,.2);
+}
+.perfil-nome {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.8rem;
+  letter-spacing:3px;
+  color:var(--text);
+}
+.perfil-cpf { font-size:11px; color:var(--muted); font-family:'Share Tech Mono',monospace; letter-spacing:2px; margin-top:4px; }
+
+/* Cartão visual */
+.cartao-visual {
+  margin:0 24px 20px;
+  background:linear-gradient(135deg,#1a1200,#0a0e00,#001a08);
+  border:1px solid rgba(200,160,32,.4);
+  border-radius:20px;
+  padding:22px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 10px 40px rgba(200,160,32,.1);
+}
+.cartao-visual::before {
+  content:'';
+  position:absolute;
+  top:-40px; right:-40px;
+  width:150px; height:150px;
+  background:radial-gradient(circle,rgba(200,160,32,.1),transparent);
+}
+.cartao-chip {
+  width:36px; height:28px;
+  background:linear-gradient(135deg,#c8a020,#f0cc55);
+  border-radius:6px;
+  margin-bottom:20px;
+  position:relative;
+}
+.cartao-chip::after {
+  content:'';
+  position:absolute;
+  inset:4px;
+  border:1px solid rgba(0,0,0,.3);
+  border-radius:3px;
+  background:linear-gradient(135deg,#a07010,#e0b030);
+}
+.cartao-rfid {
+  position:absolute;
+  top:22px; right:22px;
+  font-size:1.8rem;
+  opacity:.6;
+}
+.cartao-brand {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.3rem;
+  letter-spacing:5px;
+  color:var(--gold);
+}
+.cartao-num {
+  font-family:'Share Tech Mono',monospace;
+  font-size:1rem;
+  letter-spacing:4px;
+  color:rgba(200,160,32,.6);
+  margin:8px 0;
+}
+.cartao-nome-label { font-size:9px; color:var(--gold3); letter-spacing:2px; }
+.cartao-nome-val {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1rem;
+  letter-spacing:3px;
+  color:var(--gold);
+}
+.cartao-saldo-area { display:flex; justify-content:space-between; align-items:flex-end; margin-top:14px; }
+.cartao-saldo-label { font-size:9px; color:var(--gold3); letter-spacing:2px; }
+.cartao-saldo-val {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.8rem;
+  color:var(--gold);
+  line-height:1;
+}
+
+.perfil-menu { padding:0 24px 24px; display:flex; flex-direction:column; gap:8px; }
+.menu-item {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:16px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  cursor:pointer;
+  transition:all .2s;
+}
+.menu-item:active { background:var(--panel2); }
+.menu-item-icon { font-size:1.3rem; width:32px; text-align:center; }
+.menu-item-label { flex:1; font-size:.95rem; color:var(--text); }
+.menu-item-arrow { color:var(--muted); font-size:.8rem; }
+
+/* ══════════════════════════════════════════
+   SCREEN 9 — COMPRA NO APP
+══════════════════════════════════════════ */
+#s-compra { background:var(--bg); }
+.compra-body { padding:0 24px 24px; display:flex; flex-direction:column; gap:16px; }
+.produto-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.produto-card {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:16px;
+  cursor:pointer;
+  transition:all .2s;
+  position:relative;
+  overflow:hidden;
+}
+.produto-card.sel {
+  border-color:var(--border2);
+  background:rgba(200,160,32,.06);
+}
+.produto-card:active { transform:scale(.96); }
+.produto-emoji { font-size:2.5rem; display:block; margin-bottom:10px; }
+.produto-nome { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:2px; color:var(--text); }
+.produto-preco { font-size:11px; color:var(--gold); font-family:'Share Tech Mono',monospace; margin-top:4px; }
+.produto-sel-dot {
+  position:absolute;
+  top:10px; right:10px;
+  width:20px; height:20px;
+  border-radius:50%;
+  background:var(--gold);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  font-size:10px;
+  color:#000;
+}
+.produto-card.sel .produto-sel-dot { display:flex; }
+.ml-selector {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.ml-btn {
+  width:44px; height:44px;
+  border-radius:12px;
+  background:var(--panel2);
+  border:1px solid var(--border);
+  color:var(--text);
+  font-size:1.4rem;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.ml-val {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:2rem;
+  color:var(--text);
+  letter-spacing:2px;
+}
+.ml-unit { font-size:11px; color:var(--muted); font-family:'Share Tech Mono',monospace; }
+.compra-total {
+  background:linear-gradient(135deg,#1a1400,#0d1018);
+  border:1px solid var(--border2);
+  border-radius:16px;
+  padding:18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.total-label { font-size:12px; color:var(--muted); letter-spacing:2px; }
+.total-val {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:2rem;
+  color:var(--gold);
+}
+
+/* ══════════════════════════════════════════
+   NAVIGATION LABELS
+══════════════════════════════════════════ */
+.screens-nav {
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:8px;
+  background:rgba(0,0,0,.8);
+  backdrop-filter:blur(20px);
+  padding:10px 16px;
+  border-radius:30px;
+  border:1px solid #ffffff15;
+  z-index:1000;
+  flex-wrap:wrap;
+  justify-content:center;
+  max-width:900px;
+}
+.snav-btn {
+  padding:6px 14px;
+  border-radius:20px;
+  background:transparent;
+  border:1px solid #ffffff20;
+  color:#ffffff60;
+  font-size:11px;
+  letter-spacing:1px;
+  cursor:pointer;
+  font-family:'Share Tech Mono',monospace;
+  transition:all .2s;
+  white-space:nowrap;
+}
+.snav-btn.active { background:rgba(200,160,32,.2); border-color:rgba(200,160,32,.4); color:var(--gold); }
+
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+  PHONE 1 — SPLASH + IDADE
+══════════════════════════════════════ -->
+<div class="phone">
+  <!-- SPLASH -->
+  <div class="screen active" id="s-splash">
+    <div class="mesh-bg"></div>
+    <div class="splash-logo">
+      <span class="splash-icon">🍺</span>
+      <div class="splash-name">PRESIDENT</div>
+      <div class="splash-sub">24 HORAS · SISTEMA</div>
+      <div class="splash-line"></div>
+      <div class="splash-loading">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+  PHONE 2 — VERIFICAÇÃO DE IDADE
+══════════════════════════════════════ -->
+<div class="phone">
+  <div class="screen active" id="s-idade">
+    <div class="mesh-bg"></div>
+    <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+    <div class="scroll">
+      <div class="idade-hero">
+        <span class="idade-icon">🔞</span>
+        <div class="idade-title">VERIFICAÇÃO DE IDADE</div>
+        <p class="idade-desc">O PRESIDENT 24H comercializa bebidas alcoólicas. O acesso é restrito a maiores de 18 anos.</p>
+      </div>
+      <div class="idade-body">
+        <div class="idade-law">
+          Lei 9.294/1996 · ECA Art. 243<br>
+          É proibida a venda de bebidas alcoólicas<br>
+          a menores de 18 anos.
+        </div>
+        <div style="background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;">
+          <div class="label" style="text-align:center;">Data de nascimento</div>
+          <input type="date" class="inp" style="text-align:center;font-size:1.1rem;">
+          <div style="font-size:11px;color:var(--muted);text-align:center;">Confirme sua data para continuar</div>
+        </div>
+        <button class="btn-idade-sim">✓ SOU MAIOR DE 18 ANOS</button>
+        <button class="btn-idade-nao">Não sou maior de idade</button>
+        <div style="font-size:10px;color:var(--muted);text-align:center;line-height:1.6;">
+          Ao continuar você confirma que tem 18 anos ou mais e concorda com nossos Termos de Uso e Política de Privacidade (LGPD).
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+  PHONE 3 — LOGIN
+══════════════════════════════════════ -->
+<div class="phone">
+  <div class="screen active" id="s-login">
+    <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+    <div class="scroll">
+      <div class="login-header">
+        <span class="login-logo">🍺</span>
+        <div class="login-title">PRESIDENT 24H</div>
+        <div class="login-sub">ACESSO DO CLIENTE</div>
+      </div>
+      <div class="login-body">
+        <div class="tab-switch">
+          <button class="tab-btn active">ENTRAR</button>
+          <button class="tab-btn">CADASTRAR</button>
+        </div>
+        <div class="form-group">
+          <div class="form-label">CPF</div>
+          <input class="inp" placeholder="000.000.000-00" type="tel">
+        </div>
+        <div class="form-group">
+          <div class="form-label">SENHA</div>
+          <input class="inp" placeholder="••••••••" type="password">
+        </div>
+        <button class="btn-primary">ENTRAR</button>
+        <div class="divider">OU</div>
+        <div class="social-btn">
+          <span>📱</span> Entrar com WhatsApp
+        </div>
+        <div style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;cursor:pointer;">
+          Esqueci minha senha
+        </div>
+        <div style="background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Não tem conta?</div>
+          <div style="font-size:.85rem;color:var(--gold);font-family:'Bebas Neue';letter-spacing:2px;cursor:pointer;">CADASTRAR AGORA — GRÁTIS</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+  PHONE 4 — HOME
+══════════════════════════════════════ -->
+<div class="phone">
+  <div class="screen active" id="s-home">
+    <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+    <div class="scroll">
+      <div class="home-header">
+        <div class="home-greeting">BOM DIA,</div>
+        <div class="home-name">EVANILDO 👋</div>
+        <div class="notif-bell">🔔<div class="notif-dot"></div></div>
+      </div>
+
+      <!-- Saldo Card -->
+      <div class="saldo-card">
+        <div class="saldo-label">SALDO DISPONÍVEL</div>
+        <div class="saldo-valor">R$ 47,50</div>
+        <div class="saldo-cartao">CARTÃO Nº 0042 · •••• A1B2</div>
+        <div class="saldo-actions">
+          <button class="saldo-btn saldo-btn-add">➕ RECARREGAR</button>
+          <button class="saldo-btn saldo-btn-hist">📋 EXTRATO</button>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-title">ACESSO RÁPIDO</div>
+      <div class="quick-grid">
+        <div class="quick-item">
+          <div class="quick-icon">🍺</div>
+          <div class="quick-label">Pedir</div>
+        </div>
+        <div class="quick-item">
+          <div class="quick-icon">📍</div>
+          <div class="quick-label">Máquinas</div>
+        </div>
+        <div class="quick-item">
+          <div class="quick-icon">↩️</div>
+          <div class="quick-label">Reembolso</div>
+        </div>
+        <div class="quick-item">
+          <div class="quick-icon">🔐</div>
+          <div class="quick-label">Alterar PIN</div>
+        </div>
+      </div>
+
+      <!-- Promo -->
+      <div class="promo">
+        <div class="promo-icon">🎉</div>
+        <div>
+          <div class="promo-title">RECARGA COM 10% BÔNUS</div>
+          <div class="promo-desc">Recarregue acima de R$ 50 e ganhe R$ 5 de bônus</div>
+        </div>
+      </div>
+
+      <!-- Histórico recente -->
+      <div class="hist-title">
+        <div class="label">ÚLTIMAS COMPRAS</div>
+        <div class="hist-ver">VER TUDO</div>
+      </div>
+      <div class="hist-item">
+        <div class="hist-emoji">🍺</div>
+        <div class="hist-info">
+          <div class="hist-nome">Heineken 300ml</div>
+          <div class="hist-data">Hoje · 22:41 · PRESIDENT 01</div>
+        </div>
+        <div class="hist-valor neg">-R$ 3,60</div>
+      </div>
+      <div class="hist-item">
+        <div class="hist-emoji">💳</div>
+        <div class="hist-info">
+          <div class="hist-nome">Recarga PIX</div>
+          <div class="hist-data">Ontem · 18:30</div>
+        </div>
+        <div class="hist-valor pos">+R$ 30,00</div>
+      </div>
+      <div class="hist-item">
+        <div class="hist-emoji">🍺</div>
+        <div class="hist-info">
+          <div class="hist-nome">Brahma 400ml</div>
+          <div class="hist-data">13/03 · 21:15 · PRESIDENT 01</div>
+        </div>
+        <div class="hist-valor neg">-R$ 4,80</div>
+      </div>
+      <div style="height:20px;"></div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottomnav">
+      <button class="nav-btn active">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Início</span>
+      </button>
+      <button class="nav-btn">
+        <span class="nav-icon">🍺</span>
+        <span class="nav-label">Pedir</span>
+      </button>
+      <button class="nav-btn">
+        <span class="nav-icon">📍</span>
+        <span class="nav-label">Máquinas</span>
+      </button>
+      <button class="nav-btn">
+        <span class="nav-icon">📋</span>
+        <span class="nav-label">Histórico</span>
+      </button>
+      <button class="nav-btn">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">Perfil</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+  PHONE 5 — RECARGA PIX
+══════════════════════════════════════ -->
+<div class="phone">
+  <div class="screen active" id="s-recarga">
+    <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+    <div class="scroll">
+      <div class="page-header">
+        <div class="back-btn">←</div>
+        <div class="page-title">RECARREGAR SALDO</div>
+      </div>
+      <div class="recarga-body">
+        <div class="valor-display">
+          <div class="label" style="margin-bottom:8px;">VALOR DA RECARGA</div>
+          <div class="valor-atual">R$ 30,00</div>
+        </div>
+        <div class="valores-rapidos">
+          <div class="val-btn">R$10</div>
+          <div class="val-btn sel">R$30</div>
+          <div class="val-btn">R$50</div>
+          <div class="val-btn">R$100</div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">OUTRO VALOR</div>
+          <input class="inp" placeholder="R$ 0,00" type="tel">
+        </div>
+        <div class="pix-info">
+          <div class="pix-icon">⚡</div>
+          <div class="pix-text">
+            <strong style="color:var(--green);">PIX instantâneo</strong><br>
+            Saldo disponível em segundos após o pagamento ser confirmado.
+          </div>
+        </div>
+        <div class="card" style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;justify-content:space-between;">
+            <span class="label">VALOR</span>
+            <span style="color:var(--text);font-weight:600;">R$ 30,00</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span class="label">BÔNUS</span>
+            <span style="color:var(--green);">+ R$ 0,00</span>
+          </div>
+          <div style="height:1px;background:var(--border);"></div>
+          <div style="display:flex;justify-content:space-between;">
+            <span class="label">TOTAL NO CARTÃO</span>
+            <span style="color:var(--gold);font-family:'Bebas Neue';font-size:1.2rem;letter-spacing:2px;">R$ 77,50</span>
+          </div>
+        </div>
+        <button class="btn-green">⚡ GERAR PIX</button>
+        <div style="font-size:10px;color:var(--muted);text-align:center;line-height:1.6;">
+          Chave PIX: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f8888a9d8b919c9d968ccacc90b888999f99959d968c978bd69b9795">[email&#160;protected]</a><br>
+          O QR Code será gerado após confirmar
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+  PHONE 6 — HISTÓRICO
+══════════════════════════════════════ -->
+<div class="phone">
+  <div class="screen active" id="s-historico">
+    <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+    <div class="scroll">
+      <div class="page-header">
+        <div class="back-btn">←</div>
+        <div class="page-title">HISTÓRICO</div>
+      </div>
+      <div class="hist-filter">
+        <div class="filter-chip active">TUDO</div>
+        <div class="filter-chip">COMPRAS</div>
+        <div class="filter-chip">RECARGAS</div>
+        <div class="filter-chip">REEMBOLSOS</div>
+      </div>
+
+      <div class="hist-section">
+        <div class="hist-section-title">HOJE — 14/03/2026</div>
+        <div class="hist-row">
+          <div class="hist-row-icon icon-venda">🍺</div>
+          <div class="hist-row-info">
+            <div class="hist-row-title">Heineken 300ml</div>
+            <div class="hist-row-sub">22:41 · PRESIDENT 01 · PIX</div>
+          </div>
+          <div class="hist-row-right">
+            <div class="hist-row-val" style="color:var(--red);">-R$ 3,60</div>
+            <div class="hist-row-code">PRES01224114031226</div>
+          </div>
+        </div>
+        <div class="hist-row">
+          <div class="hist-row-icon icon-recarga">💳</div>
+          <div class="hist-row-info">
+            <div class="hist-row-title">Recarga PIX</div>
+            <div class="hist-row-sub">18:30 · Saldo adicionado</div>
+          </div>
+          <div class="hist-row-right">
+            <div class="hist-row-val" style="color:var(--green);">+R$ 30,00</div>
+            <div class="hist-row-code">REC183014032026</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hist-section">
+        <div class="hist-section-title">ONTEM — 13/03/2026</div>
+        <div class="hist-row">
+          <div class="hist-row-icon icon-venda">🍺</div>
+          <div class="hist-row-info">
+            <div class="hist-row-title">Brahma 400ml</div>
+            <div class="hist-row-sub">21:15 · PRESIDENT 01 · CARTÃO</div>
+          </div>
+          <div class="hist-row-right">
+            <div class="hist-row-val" style="color:var(--red);">-R$ 4,80</div>
+            <div class="hist-row-code">PRES01211513032026</div>
+          </div>
+        </div>
+        <div class="hist-row">
+          <div class="hist-row-icon icon-reemb">↩️</div>
+          <div class="hist-row-info">
+            <div class="hist-row-title">Reembolso</div>
+            <div class="hist-row-sub">19:40 · Cancelamento</div>
+          </div>
+          <div class="hist-row-right">
+            <div class="hist-row-val" style="color:var(--green);">+R$ 3,60</div>
+            <div class="hist-row-code">PRES01194013032026</div>
+          </div>
+        </div>
+        <div class="hist-row">
+          <div class="hist-row-icon icon-venda">🚬</div>
+          <div class="hist-row-info">
+            <div class="hist-row-title">Cigarro Varejo</div>
+            <div class="hist-row-sub">17:20 · PRESIDENT 01 · VOUCHER</div>
+          </div>
+          <div class="hist-row-right">
+            <div class="hist-row-val" style="color:var(--red);">-R$ 2,00</div>
+            <div class="hist-row-code">PRES01172013032026</div>
+          </div>
+        </div>
+      </div>
+      <div style="height:20px;"></div>
+    </div>
+
+    <div class="bottomnav">
+      <button class="nav-btn"><span class="nav-icon">🏠</span><span class="nav-label">Início</span></button>
+      <button class="nav-btn"><span class="nav-icon">🍺</span><span class="nav-label">Pedir</span></button>
+      <button class="nav-btn"><span class="nav-icon">📍</span><span class="nav-label">Máquinas</span></button>
+      <button class="nav-btn active"><span class="nav-icon">📋</span><span class="nav-label">Histórico</span></button>
+      <button class="nav-btn"><span class="nav-icon">👤</span><span class="nav-label">Perfil</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+  PHONE 7 — MÁQUINAS
+══════════════════════════════════════ -->
+<div class="phone">
+  <div class="screen active" id="s-maquinas">
+    <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+    <div class="scroll">
+      <div class="page-header">
+        <div class="back-btn">←</div>
+        <div class="page-title">MÁQUINAS PRÓXIMAS</div>
+      </div>
+      <div class="map-placeholder">
+        <div class="map-grid"></div>
+        <div class="map-pin">📍</div>
+        <div class="map-label">MAPA INTERATIVO</div>
+      </div>
+      <div style="padding:0 24px 12px;">
+        <input class="inp" placeholder="🔍  Buscar por endereço...">
+      </div>
+      <div class="maq-item">
+        <div class="maq-icon">🍺</div>
+        <div class="maq-info">
+          <div class="maq-nome">PRESIDENT 24H — 01</div>
+          <div class="maq-end">Rua C 15, Centro</div>
+          <div class="maq-dist">📍 120m de distância</div>
+        </div>
+        <div class="maq-status">
+          <span class="badge badge-green">ABERTA</span>
+          <span style="font-size:10px;color:var(--muted);">24h</span>
+        </div>
+      </div>
+      <div class="maq-item">
+        <div class="maq-icon">🍺</div>
+        <div class="maq-info">
+          <div class="maq-nome">PRESIDENT 24H — 02</div>
+          <div class="maq-end">Av. Principal, 450</div>
+          <div class="maq-dist">📍 800m de distância</div>
+        </div>
+        <div class="maq-status">
+          <span class="badge badge-green">ABERTA</span>
+          <span style="font-size:10px;color:var(--muted);">24h</span>
+        </div>
+      </div>
+      <div class="maq-item" style="opacity:.6;">
+        <div class="maq-icon" style="opacity:.5;">🍺</div>
+        <div class="maq-info">
+          <div class="maq-nome">PRESIDENT 24H — 03</div>
+          <div class="maq-end">Rua das Flores, 88</div>
+          <div class="maq-dist">📍 1,2km de distância</div>
+        </div>
+        <div class="maq-status">
+          <span class="badge badge-red">MANUTENÇÃO</span>
+        </div>
+      </div>
+      <div style="height:20px;"></div>
+    </div>
+
+    <div class="bottomnav">
+      <button class="nav-btn"><span class="nav-icon">🏠</span><span class="nav-label">Início</span></button>
+      <button class="nav-btn"><span class="nav-icon">🍺</span><span class="nav-label">Pedir</span></button>
+      <button class="nav-btn active"><span class="nav-icon">📍</span><span class="nav-label">Máquinas</span></button>
+      <button class="nav-btn"><span class="nav-icon">📋</span><span class="nav-label">Histórico</span></button>
+      <button class="nav-btn"><span class="nav-icon">👤</span><span class="nav-label">Perfil</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+  PHONE 8 — PERFIL / CARTÃO
+══════════════════════════════════════ -->
+<div class="phone">
+  <div class="screen active" id="s-perfil">
+    <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+    <div class="scroll">
+      <div class="perfil-header">
+        <div class="perfil-avatar">👤</div>
+        <div class="perfil-nome">EVANILDO</div>
+        <div class="perfil-cpf">CPF: •••.456.789-••</div>
+        <div style="margin-top:8px;display:flex;gap:8px;justify-content:center;">
+          <span class="badge badge-gold">CLIENTE GOLD</span>
+          <span class="badge badge-green">VERIFICADO</span>
+        </div>
+      </div>
+
+      <!-- Cartão visual -->
+      <div class="cartao-visual">
+        <div class="cartao-rfid">📶</div>
+        <div class="cartao-chip"></div>
+        <div class="cartao-brand">PRESIDENT 24H</div>
+        <div class="cartao-num">•••• •••• •••• A1B2</div>
+        <div class="cartao-saldo-area">
+          <div>
+            <div class="cartao-nome-label">TITULAR</div>
+            <div class="cartao-nome-val">EVANILDO</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="cartao-saldo-label">SALDO</div>
+            <div class="cartao-saldo-val">R$ 47,50</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Menu -->
+      <div class="perfil-menu">
+        <div class="menu-item">
+          <div class="menu-item-icon">🔐</div>
+          <div class="menu-item-label">Alterar PIN do Cartão</div>
+          <div class="menu-item-arrow">›</div>
+        </div>
+        <div class="menu-item">
+          <div class="menu-item-icon">📡</div>
+          <div class="menu-item-label">Vincular Cartão RFID</div>
+          <div class="menu-item-arrow">›</div>
+        </div>
+        <div class="menu-item">
+          <div class="menu-item-icon">↩️</div>
+          <div class="menu-item-label">Solicitar Reembolso</div>
+          <div class="menu-item-arrow">›</div>
+        </div>
+        <div class="menu-item">
+          <div class="menu-item-icon">🔔</div>
+          <div class="menu-item-label">Notificações</div>
+          <div class="menu-item-arrow">›</div>
+        </div>
+        <div class="menu-item">
+          <div class="menu-item-icon">🛡️</div>
+          <div class="menu-item-label">Privacidade (LGPD)</div>
+          <div class="menu-item-arrow">›</div>
+        </div>
+        <div class="menu-item" style="border-color:rgba(232,48,48,.2);">
+          <div class="menu-item-icon">🚪</div>
+          <div class="menu-item-label" style="color:var(--red);">Sair da conta</div>
+          <div class="menu-item-arrow">›</div>
+        </div>
+      </div>
+      <div style="height:20px;"></div>
+    </div>
+
+    <div class="bottomnav">
+      <button class="nav-btn"><span class="nav-icon">🏠</span><span class="nav-label">Início</span></button>
+      <button class="nav-btn"><span class="nav-icon">🍺</span><span class="nav-label">Pedir</span></button>
+      <button class="nav-btn"><span class="nav-icon">📍</span><span class="nav-label">Máquinas</span></button>
+      <button class="nav-btn"><span class="nav-icon">📋</span><span class="nav-label">Histórico</span></button>
+      <button class="nav-btn active"><span class="nav-icon">👤</span><span class="nav-label">Perfil</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+  PHONE 9 — COMPRAR NO APP
+══════════════════════════════════════ -->
+<div class="phone">
+  <div class="screen active" id="s-compra">
+    <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+    <div class="scroll">
+      <div class="page-header">
+        <div class="back-btn">←</div>
+        <div class="page-title">FAZER PEDIDO</div>
+      </div>
+      <div class="compra-body">
+        <div class="label">ESCOLHA O PRODUTO</div>
+        <div class="produto-grid">
+          <div class="produto-card sel">
+            <div class="produto-sel-dot">✓</div>
+            <span class="produto-emoji">🍺</span>
+            <div class="produto-nome">HEINEKEN</div>
+            <div class="produto-preco">R$ 1,20 / 100ml</div>
+          </div>
+          <div class="produto-card">
+            <div class="produto-sel-dot">✓</div>
+            <span class="produto-emoji">🍺</span>
+            <div class="produto-nome">BRAHMA</div>
+            <div class="produto-preco">R$ 1,20 / 100ml</div>
+          </div>
+          <div class="produto-card">
+            <div class="produto-sel-dot">✓</div>
+            <span class="produto-emoji">🚬</span>
+            <div class="produto-nome">CIGARRO</div>
+            <div class="produto-preco">R$ 2,00 / un</div>
+          </div>
+          <div class="produto-card">
+            <div class="produto-sel-dot">✓</div>
+            <span class="produto-emoji">📦</span>
+            <div class="produto-nome">MAÇO</div>
+            <div class="produto-preco">R$ 15,00 / un</div>
+          </div>
+        </div>
+
+        <div class="label">QUANTIDADE (ML)</div>
+        <div class="ml-selector">
+          <button class="ml-btn">−</button>
+          <div style="text-align:center;">
+            <div class="ml-val">300</div>
+            <div class="ml-unit">MILILITROS</div>
+          </div>
+          <button class="ml-btn">+</button>
+        </div>
+
+        <div class="compra-total">
+          <div>
+            <div class="total-label">TOTAL</div>
+            <div style="font-size:11px;color:var(--muted);">Heineken 300ml</div>
+          </div>
+          <div class="total-val">R$ 3,60</div>
+        </div>
+
+        <div class="card" style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:1.5rem;">💳</span>
+          <div style="flex:1;">
+            <div style="font-size:.85rem;color:var(--text);">Pagar com Cartão President</div>
+            <div style="font-size:11px;color:var(--muted);">Saldo: R$ 47,50</div>
+          </div>
+          <div style="width:20px;height:20px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;">✓</div>
+        </div>
+
+        <button class="btn-primary">🍺 CONFIRMAR PEDIDO</button>
+        <div style="font-size:10px;color:var(--muted);text-align:center;line-height:1.6;">
+          O pedido será liberado na máquina após confirmação.<br>
+          Apresente o QR Code ou aproxime o cartão RFID.
+        </div>
+      </div>
+    </div>
+
+    <div class="bottomnav">
+      <button class="nav-btn"><span class="nav-icon">🏠</span><span class="nav-label">Início</span></button>
+      <button class="nav-btn active"><span class="nav-icon">🍺</span><span class="nav-label">Pedir</span></button>
+      <button class="nav-btn"><span class="nav-icon">📍</span><span class="nav-label">Máquinas</span></button>
+      <button class="nav-btn"><span class="nav-icon">📋</span><span class="nav-label">Histórico</span></button>
+      <button class="nav-btn"><span class="nav-icon">👤</span><span class="nav-label">Perfil</span></button>
+    </div>
+  </div>
+</div>
+
+<div style="height:80px;width:100%;"></div>
+
+<!-- Nav labels -->
+<div class="screens-nav">
+  <button class="snav-btn active" onclick="highlight(this)">1· SPLASH</button>
+  <button class="snav-btn" onclick="highlight(this)">2· IDADE</button>
+  <button class="snav-btn" onclick="highlight(this)">3· LOGIN</button>
+  <button class="snav-btn" onclick="highlight(this)">4· HOME</button>
+  <button class="snav-btn" onclick="highlight(this)">5· RECARGA</button>
+  <button class="snav-btn" onclick="highlight(this)">6· HISTÓRICO</button>
+  <button class="snav-btn" onclick="highlight(this)">7· MÁQUINAS</button>
+  <button class="snav-btn" onclick="highlight(this)">8· PERFIL</button>
+  <button class="snav-btn" onclick="highlight(this)">9· COMPRA</button>
+</div>
+
+<script>
+function highlight(btn) {
+  document.querySelectorAll('.snav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+// val btns
+document.querySelectorAll('.val-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    b.closest('.valores-rapidos').querySelectorAll('.val-btn').forEach(x => x.classList.remove('sel'));
+    b.classList.add('sel');
+  });
+});
+// produto cards
+document.querySelectorAll('.produto-card').forEach(c => {
+  c.addEventListener('click', () => {
+    c.closest('.produto-grid').querySelectorAll('.produto-card').forEach(x => x.classList.remove('sel'));
+    c.classList.add('sel');
+  });
+});
+// tab switch
+document.querySelector
+// tab switch (continuação original preservada)
+// ── FIREBASE — integração pedidos app ──────────────────────────
+
+// ⚙️ CONFIGURAÇÃO — substitua pelos seus dados do Firebase
+const FB_PROJECT  = 'president24h';          // seu projectId
+const FB_API_KEY  = 'SUA_API_KEY_AQUI';      // sua Web API Key
+const MACHINE_ID  = 'maquina_01';            // ID da máquina
+
+// Estado do pedido em andamento
+let pedidoDocId   = null;
+let pedidoUnsub   = null;
+
+// ── Lê produto e ml selecionados na tela de compra ──
+function getPedidoAtual() {
+  const card = document.querySelector('.produto-card.sel');
+  const produto = card ? card.querySelector('.produto-nome')?.textContent?.trim().toUpperCase() : 'HEINEKEN';
+  const mlEl    = document.querySelector('.ml-val');
+  const ml      = mlEl ? parseInt(mlEl.textContent) : 300;
+  return { produto, ml };
+}
+
+// ── Cria pedido no Firestore ─────────────────────────────────────
+async function criarPedido(metodo) {
+  const { produto, ml } = getPedidoAtual();
+  const url = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/pedidos_app?key=${FB_API_KEY}`;
+  const body = {
+    fields: {
+      produto:   { stringValue: produto },
+      ml:        { integerValue: String(ml) },
+      metodo:    { stringValue: metodo },
+      status:    { stringValue: 'aguardando' },
+      machineId: { stringValue: MACHINE_ID },
+      ts:        { stringValue: new Date().toISOString() }
+    }
+  };
+  const res  = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  const data = await res.json();
+  // Extrai docId do name retornado
+  const name = data.name || '';
+  pedidoDocId = name.split('/').pop();
+  return pedidoDocId;
+}
+
+// ── Aguarda status no Firestore (polling a cada 2s) ──────────────
+function aguardarStatus(docId, onUpdate) {
+  if (pedidoUnsub) clearInterval(pedidoUnsub);
+  pedidoUnsub = setInterval(async () => {
+    const url = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/pedidos_app/${docId}?key=${FB_API_KEY}`;
+    const res  = await fetch(url);
+    const data = await res.json();
+    const f    = data.fields || {};
+    const status = f.status?.stringValue || '';
+    onUpdate(status, f);
+  }, 2000);
+}
+
+function pararPolling() {
+  if (pedidoUnsub) { clearInterval(pedidoUnsub); pedidoUnsub = null; }
+}
+
+// ── Mostra modal de pagamento ────────────────────────────────────
+function mostrarModalPgto(metodo) {
+  let modal = document.getElementById('modal-pgto');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'modal-pgto';
+    modal.style.cssText = `
+      position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:16px;padding:24px;font-family:'Barlow Condensed',sans-serif;
+    `;
+    document.body.appendChild(modal);
+  }
+  modal.innerHTML = `
+    <div style="background:#0d1018;border:1px solid #c8a02040;border-radius:20px;padding:28px 24px;width:100%;max-width:340px;text-align:center;">
+      <div id="mpgto-icon" style="font-size:2.5rem;margin-bottom:12px;">⏳</div>
+      <div id="mpgto-titulo" style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;color:#c8a020;margin-bottom:8px;">PROCESSANDO</div>
+      <div id="mpgto-sub" style="font-size:12px;color:#6a7080;line-height:1.6;">Aguarde, criando pagamento...</div>
+      <div id="mpgto-qr" style="margin:16px 0;display:none;"></div>
+      <button onclick="cancelarPedido()" style="margin-top:16px;background:transparent;border:1px solid #ffffff20;border-radius:10px;padding:10px 24px;color:#6a7080;font-family:'Bebas Neue',sans-serif;letter-spacing:2px;cursor:pointer;" id="btn-cancelar-pgto">CANCELAR</button>
+    </div>
+  `;
+  modal.style.display = 'flex';
+}
+
+function atualizarModal(status, fields) {
+  const icon   = document.getElementById('mpgto-icon');
+  const titulo = document.getElementById('mpgto-titulo');
+  const sub    = document.getElementById('mpgto-sub');
+  const qrDiv  = document.getElementById('mpgto-qr');
+  const btnCanc= document.getElementById('btn-cancelar-pgto');
+
+  if (status === 'pix_gerado') {
+    const qr    = fields.qr?.stringValue || '';
+    const valor = fields.valor?.doubleValue || 0;
+    if (icon)   icon.textContent   = '⚡';
+    if (titulo) titulo.textContent = 'PIX GERADO';
+    if (sub)    sub.innerHTML      = `<b style="color:#18e070;font-size:1.1rem;">R$ ${valor.toFixed(2).replace('.',',')}</b><br>Escaneie o QR Code abaixo<br>ou copie o código PIX`;
+    if (qrDiv && qr) {
+      qrDiv.style.display = 'block';
+      qrDiv.innerHTML = `
+        <div style="background:#fff;padding:10px;border-radius:12px;display:inline-block;margin-bottom:8px;">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qr)}" style="display:block;border-radius:6px;">
+        </div>
+        <br>
+        <button onclick="navigator.clipboard.writeText('${qr}').then(()=>alert('Código PIX copiado!'))"
+          style="background:#c8a020;border:none;border-radius:8px;padding:8px 20px;font-family:'Bebas Neue',sans-serif;letter-spacing:2px;color:#000;cursor:pointer;">
+          📋 COPIAR CÓDIGO PIX
+        </button>`;
+    }
+  } else if (status === 'cartao_aguardando') {
+    const valor = fields.valor?.doubleValue || 0;
+    if (icon)   icon.textContent   = '💳';
+    if (titulo) titulo.textContent = 'APROXIME O CARTÃO';
+    if (sub)    sub.innerHTML      = `<b style="color:#c8a020;font-size:1.1rem;">R$ ${valor.toFixed(2).replace('.',',')}</b><br>Aproxime ou insira o cartão<br>na maquininha da máquina`;
+  } else if (status === 'concluido') {
+    pararPolling();
+    if (icon)   icon.textContent   = '🍺';
+    if (titulo) titulo.textContent = 'PEDIDO LIBERADO!';
+    if (sub)    sub.textContent    = 'Retire seu produto na máquina.';
+    if (btnCanc) btnCanc.textContent = 'FECHAR';
+    if (btnCanc) btnCanc.onclick   = fecharModal;
+  } else if (status === 'erro') {
+    pararPolling();
+    const motivo = fields.motivo?.stringValue || 'erro';
+    if (icon)   icon.textContent   = '❌';
+    if (titulo) titulo.textContent = 'ERRO NO PEDIDO';
+    if (sub)    sub.textContent    = `Motivo: ${motivo}. Tente novamente.`;
+    if (btnCanc) btnCanc.textContent = 'FECHAR';
+    if (btnCanc) btnCanc.onclick   = fecharModal;
+  }
+}
+
+function fecharModal() {
+  pararPolling();
+  const modal = document.getElementById('modal-pgto');
+  if (modal) modal.style.display = 'none';
+  pedidoDocId = null;
+}
+
+async function cancelarPedido() {
+  pararPolling();
+  if (pedidoDocId) {
+    const url = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/pedidos_app/${pedidoDocId}?key=${FB_API_KEY}`;
+    await fetch(url, {
+      method: 'PATCH',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ fields: { status: { stringValue: 'cancelado' } } })
+    });
+  }
+  fecharModal();
+}
+
+// ── Conecta o botão CONFIRMAR PEDIDO ─────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const btnConfirmar = document.querySelector('.compra-body .btn-primary');
+  if (btnConfirmar) {
+    btnConfirmar.addEventListener('click', async () => {
+      // Mostra seletor de método de pagamento
+      let met = await escolherMetodoPgto();
+      if (!met) return;
+      mostrarModalPgto(met);
+      try {
+        const docId = await criarPedido(met);
+        aguardarStatus(docId, atualizarModal);
+      } catch(e) {
+        alert('Erro ao criar pedido: ' + e.message);
+        fecharModal();
+      }
+    });
+  }
+});
+
+// ── Modal de escolha de método ───────────────────────────────────
+function escolherMetodoPgto() {
+  return new Promise(resolve => {
+    let sel = document.getElementById('modal-met');
+    if (!sel) {
+      sel = document.createElement('div');
+      sel.id = 'modal-met';
+      sel.style.cssText = `
+        position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9998;
+        display:flex;flex-direction:column;align-items:center;justify-content:center;
+        gap:12px;padding:24px;font-family:'Barlow Condensed',sans-serif;
+      `;
+      document.body.appendChild(sel);
+    }
+    sel.innerHTML = `
+      <div style="background:#0d1018;border:1px solid #c8a02040;border-radius:20px;padding:28px 24px;width:100%;max-width:320px;text-align:center;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:3px;color:#c8a020;margin-bottom:20px;">FORMA DE PAGAMENTO</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <button onclick="window._metResolve('PIX');document.getElementById('modal-met').style.display='none'"
+            style="background:#18e07015;border:1px solid #18e07040;border-radius:12px;padding:14px;color:#18e070;font-family:'Bebas Neue',sans-serif;letter-spacing:3px;font-size:1rem;cursor:pointer;">
+            ⚡ PIX
+          </button>
+          <button onclick="window._metResolve('CREDITO');document.getElementById('modal-met').style.display='none'"
+            style="background:#c8a02015;border:1px solid #c8a02040;border-radius:12px;padding:14px;color:#c8a020;font-family:'Bebas Neue',sans-serif;letter-spacing:3px;font-size:1rem;cursor:pointer;">
+            💳 CRÉDITO
+          </button>
+          <button onclick="window._metResolve('DEBITO');document.getElementById('modal-met').style.display='none'"
+            style="background:#c8a02015;border:1px solid #c8a02040;border-radius:12px;padding:14px;color:#c8a020;font-family:'Bebas Neue',sans-serif;letter-spacing:3px;font-size:1rem;cursor:pointer;">
+            💳 DÉBITO
+          </button>
+          <button onclick="window._metResolve(null);document.getElementById('modal-met').style.display='none'"
+            style="background:transparent;border:1px solid #ffffff15;border-radius:12px;padding:10px;color:#6a7080;font-family:'Bebas Neue',sans-serif;letter-spacing:2px;cursor:pointer;">
+            CANCELAR
+          </button>
+        </div>
+      </div>`;
+    sel.style.display = 'flex';
+    window._metResolve = resolve;
+  });
+}
+</script>
+</body>
+</html>
